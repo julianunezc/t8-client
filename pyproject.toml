@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "t8spectrum"
+version = "0.1.0"
+description = "Calculates the spectrum from a waveform and compares it with the T8 output"
+authors = [
+    {name = "Julia",email = "julianunezc@gmail.com"}
+]
+readme = "README.md"
+packages = [{include = "t8spectrum", from = "."}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # Pyflakes
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "I",   # isort
+]
+ignore = []
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
