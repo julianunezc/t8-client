@@ -1,0 +1,51 @@
+# Bytecode files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+
+# Build files
+.Python
+build/
+dist/
+*.egg-info/
+
+# Test files and caches
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+*.cover
+*.cov
+*.lcov
+.pytest_cache/
+.cache/
+*.pytest_cache/
+
+# Poetry
+poetry.lock
+
+# Virtual environments
+venv/
+.env/
+*.env
+*.venv
+ENV/
+env.bak/
+venv.bak/
+
+# VSCode
+.vscode/
+
+# Temporary files
+*~
+*.swp
+*.swo
+.#*
+Thumbs.db
+.DS_Store
+*.bak
+*.tmp
+*.log
