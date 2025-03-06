@@ -2,14 +2,18 @@
 name = "t8spectrum"
 version = "0.1.0"
 description = "Calculates the spectrum from a waveform and compares it with the T8 output"
-authors = [
-    {name = "Julia",email = "julianunezc@gmail.com"}
-]
+authors = ["Julia <julianunezc@gmail.com>"]
 readme = "README.md"
 packages = [{include = "t8spectrum", from = "."}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+matplotlib = "^3.10.1"
+requests = "^2.32.3"
+numpy = "^2.2.3"
+
+[tool.poetry.group.dev.dependencies]
+isort = "^6.0.1"
 
 [tool.ruff.lint]
 select = [
