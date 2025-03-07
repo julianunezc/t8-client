@@ -46,7 +46,7 @@ def b64_to_float(raw):
 
 decode_format = {"zint": zint_to_float, "zlib": zlib_to_float, "b64": b64_to_float}
 
-url = f"http://{DEVICE_IP}/rest/waves/{MACHINE}/{POINT}/{PMODE}/0?array_fmt={FORMAT}"
+url = f"http://{DEVICE_IP}/rest/waves/{MACHINE}/{POINT}/{PMODE}/1555007154?array_fmt={FORMAT}"
 
 r = requests.get(url, auth=(USER, PASS))
 if r.status_code != 200:
@@ -76,5 +76,8 @@ with open("data/wave_data.csv", "w", newline="") as f:
 # Get time axis
 t = np.linspace(0, len(wave) / srate, len(wave))
 pylab.plot(t, wave)
+pylab.xlabel("Time")  # Label for X-axis
+pylab.ylabel("Amplitude")       # Label for Y-axis
+pylab.title("Waveform Plot")    # Title of the plot
 pylab.grid(True)
 pylab.show()
