@@ -1,10 +1,10 @@
-""" This script retrieves wave data from a remote machine via a REST API, 
+"""This script retrieves wave data from a remote machine via a REST API,
 decodes the compressed data (using different compression formats: zint, zlib, or b64),
 applies a scaling factor to the signal, and saves the decoded data to a CSV file.
-Additionally, it generates a plot of the signal with time on the X-axis and 
+Additionally, it generates a plot of the signal with time on the X-axis and
 amplitude on the Y-axis."""
 
-import csv
+import os
 import sys
 from base64 import b64decode
 from struct import unpack
@@ -12,12 +12,13 @@ from zlib import decompress
 
 import matplotlib.pyplot as pylab
 import numpy as np
+import pandas as pd
 import requests
 
 FORMAT = "zint"  # zint | zlib | b64
 DEVICE_IP = "lzfs45.mirror.twave.io/lzfs45"
-USER = "" # User required
-PASS = "" # Password required
+USER = ""  # User required
+PASS = ""  # Password required
 
 MACHINE = "LP_Turbine"
 POINT = "MAD31CY005"
@@ -65,19 +66,17 @@ wave = decode_format[FORMAT](raw)
 # Apply numeric factor
 wave *= factor
 
-# Save data to csv file
-with open("data/wave_data.csv", "w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerow(["t", "amp"])
-    for i, value in enumerate(wave):
-        time = i / srate
-        writer.writerow([time, value])
-
 # Get time axis
 t = np.linspace(0, len(wave) / srate, len(wave))
+
+# Save data to csv file
+df = pd.DataFrame({"t": t, "amp": wave})
+csv_filepath = os.path.join("data", "wave_data.csv")
+df.to_csv(csv_filepath, index=False)
+
 pylab.plot(t, wave)
 pylab.xlabel("Time")  # Label for X-axis
-pylab.ylabel("Amplitude")       # Label for Y-axis
-pylab.title("Waveform Plot")    # Title of the plot
+pylab.ylabel("Amplitude")  # Label for Y-axis
+pylab.title("Waveform Plot")  # Title of the plot
 pylab.grid(True)
 pylab.show()

@@ -5,7 +5,7 @@ amplitude data to a CSV file.
 Additionally, it generates a plot of the spectrum with frequency on the X-axis and
 amplitude on the Y-axis."""
 
-import csv
+import os
 import sys
 from base64 import b64decode
 from struct import unpack
@@ -13,6 +13,7 @@ from zlib import decompress
 
 import matplotlib.pyplot as pylab
 import numpy as np
+import pandas as pd
 import requests
 
 FORMAT = "zint"  # zint | zlib | b64
@@ -71,15 +72,14 @@ sp *= factor
 # Get frequency axis
 freq = np.linspace(fmin, fmax, len(sp))
 
-# Save the data to a CSV file
-with open("data/spectrum_data.csv", mode="w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerow(["freq", "amp"])
-    # Write data rows (frequency and corresponding spectrum values)
-    writer.writerows(zip(freq, sp))
-
 # Get frequency axis
 pylab.plot(freq, sp)
+
+# Save data to csv file
+df = pd.DataFrame({"freq": freq, "amp": sp})
+csv_filepath = os.path.join("data", "spectrum_data.csv")
+df.to_csv(csv_filepath, index=False)
+
 pylab.xlabel("Frequency (Hz)")  # Label for X-axis
 pylab.ylabel("Amplitude")  # Label for Y-axis
 pylab.title("Spectrum Plot")  # Title of the plot
