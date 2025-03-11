@@ -2,14 +2,16 @@
 
 import os
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.fft import fft, fftfreq
 
 
 class Waveform:
     """A class to represent a waveform."""
 
-    def __init__(self, time: np.ndarray, amp: np.ndarray):
+    def __init__(self, time: np.ndarray, amp: np.ndarray, srate: float = 5120):
         """Initializes a Waveform object with time and amplitude arrays.
 
         Parameters:
@@ -19,6 +21,7 @@ class Waveform:
         """
         self.time = time
         self.amp = amp
+        self.srate = srate
 
     @classmethod
     def from_csv(cls, filename: str):

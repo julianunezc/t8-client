@@ -74,6 +74,7 @@ df = pd.DataFrame({"t": t, "amp": wave})
 csv_filepath = os.path.join("data", "wave_data.csv")
 df.to_csv(csv_filepath, index=False)
 
+print("Sampling rate: ", srate)
 pylab.plot(t, wave)
 pylab.xlabel("Time")  # Label for X-axis
 pylab.ylabel("Amplitude")  # Label for Y-axis
