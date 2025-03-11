@@ -14,11 +14,14 @@ import matplotlib.pyplot as pylab
 import numpy as np
 import pandas as pd
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 FORMAT = "zint"  # zint | zlib | b64
 DEVICE_IP = "lzfs45.mirror.twave.io/lzfs45"
-USER = ""  # User required
-PASS = ""  # Password required
+USER = os.getenv("T8_USER")
+PASS = os.getenv("T8_PASSWORD")
 
 MACHINE = "LP_Turbine"
 POINT = "MAD31CY005"
@@ -47,19 +50,17 @@ def b64_to_float(raw):
 
 decode_format = {"zint": zint_to_float, "zlib": zlib_to_float, "b64": b64_to_float}
 
-url = f"http://{DEVICE_IP}/rest/waves/{MACHINE}/{POINT}/{PMODE}/1555007154?array_fmt={FORMAT}"
+url = f"http://{DEVICE_IP}/rest/waves/{MACHINE}/{POINT}/{PMODE}/1555007154"
 
 r = requests.get(url, auth=(USER, PASS))
 if r.status_code != 200:
     print("Error getting data. Status code: ", r.status_code)
     sys.exit(1)
 
-ret = r.json()
-
 # Extract json fields
-srate = float(ret["sample_rate"])
-factor = float(ret.get("factor", 1))
-raw = ret["data"]
+srate = float(r.json()["sample_rate"])
+factor = float(r.json().get("factor", 1))
+raw = r.json()["data"]
 
 wave = decode_format[FORMAT](raw)
 
@@ -67,14 +68,13 @@ wave = decode_format[FORMAT](raw)
 wave *= factor
 
 # Get time axis
-t = np.linspace(0, len(wave) / srate, len(wave))
+t = np.linspace(0, len(wave) / srate, len(wave)) * 1000  # Convert seconds to ms
 
 # Save data to csv file
 df = pd.DataFrame({"t": t, "amp": wave})
 csv_filepath = os.path.join("data", "wave_data.csv")
 df.to_csv(csv_filepath, index=False)
 
-print("Sampling rate: ", srate)
 pylab.plot(t, wave)
 pylab.xlabel("Time")  # Label for X-axis
 pylab.ylabel("Amplitude")  # Label for Y-axis
