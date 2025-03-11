@@ -15,11 +15,14 @@ import matplotlib.pyplot as pylab
 import numpy as np
 import pandas as pd
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 FORMAT = "zint"  # zint | zlib | b64
 DEVICE_IP = "lzfs45.mirror.twave.io/lzfs45"
-USER = ""  # User required
-PASS = ""  # Password required
+USER = os.getenv("T8_USER")
+PASS = os.getenv("T8_PASSWORD")
 
 MACHINE = "LP_Turbine"
 POINT = "MAD31CY005"
@@ -48,7 +51,7 @@ def b64_to_float(raw):
 
 decode_format = {"zint": zint_to_float, "zlib": zlib_to_float, "b64": b64_to_float}
 
-url = f"http://{DEVICE_IP}/rest/spectra/{MACHINE}/{POINT}/{PMODE}/1555007154?array_fmt={FORMAT}"
+url = f"http://{DEVICE_IP}/rest/spectra/{MACHINE}/{POINT}/{PMODE}/1555007154"
 
 
 r = requests.get(url, auth=(USER, PASS))
@@ -56,13 +59,11 @@ if r.status_code != 200:
     print("Error getting data. Status code: ", r.status_code)
     sys.exit(1)
 
-ret = r.json()
-
 # Extract json fields
-fmin = ret.get("min_freq", 0)
-fmax = ret["max_freq"]
-factor = ret["factor"]
-raw = ret["data"]
+fmin = r.json().get("min_freq", 0)
+fmax = r.json()["max_freq"]
+factor = r.json()["factor"]
+raw = r.json()["data"]
 
 sp = decode_format[FORMAT](raw)
 
@@ -72,14 +73,12 @@ sp *= factor
 # Get frequency axis
 freq = np.linspace(fmin, fmax, len(sp))
 
-# Get frequency axis
-pylab.plot(freq, sp)
-
 # Save data to csv file
 df = pd.DataFrame({"freq": freq, "amp": sp})
 csv_filepath = os.path.join("data", "spectrum_data.csv")
 df.to_csv(csv_filepath, index=False)
 
+pylab.plot(freq, sp)
 pylab.xlabel("Frequency (Hz)")  # Label for X-axis
 pylab.ylabel("Amplitude")  # Label for Y-axis
 pylab.title("Spectrum Plot")  # Title of the plot
