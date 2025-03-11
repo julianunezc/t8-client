@@ -30,6 +30,7 @@ poetry.lock
 # Virtual environments
 venv/
 .env/
+.env
 *.env
 *.venv
 ENV/
