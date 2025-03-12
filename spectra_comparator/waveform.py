@@ -37,17 +37,12 @@ class Waveform:
         amp = data["amp"].to_numpy()
         return cls(time, amp)
 
-    def hanning_window(self) -> np.ndarray:
+    def hanning_window(self):
         """Applies a Hanning window to the waveform.
-
-        Returns:
-        np.ndarray: A numpy array containing the windowed amplitude values.
-
-        """
+        Stores the windowed amplitude values."""
         num_samples = len(self.amp)
         window = np.hanning(num_samples)
         self.windowed_amps = self.amp * window
-        return self.windowed_amps
 
     def __repr__(self) -> str:
         """Visualization of the waveform.
