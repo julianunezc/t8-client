@@ -39,7 +39,7 @@ class Waveform:
 
     def hanning_window(self) -> np.ndarray:
         """Applies a Hanning window to the waveform.
-        
+
         Returns:
         np.ndarray: A numpy array containing the windowed amplitude values.
 
