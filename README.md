@@ -65,6 +65,11 @@ The core of the spectrum comparison algorithm is implemented in the `compare_two
 
 ## Running the Project
 
+This project requires the following environment variables to access T8 data. You must define them in a .env file at the root of the project. The credentials are confidential, so make sure to obtain them from the appropriate source.
+
+- `T8_USER`: Username to access T8 data.
+- `T8_PASSWORD`: Password associated with the T8 user account
+
 The main function (`main`) simply calls `compare_two_spectra` with predefined filenames, making it easy to execute the comparison. To run it and visualize the results:
 
 1. Ensure you have the required waveform and spectrum data available in CSV format.
