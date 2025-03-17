@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Calculates the spectrum from a waveform and compares it with the T8 output"
 authors = ["Julia <julianunezc@gmail.com>"]
 readme = "README.md"
-packages = [{include = "spectra_comparator", from = "."}]
+packages = [{include = "utils"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
