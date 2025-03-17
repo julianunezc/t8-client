@@ -1,3 +1,4 @@
+import os
 import sys
 from base64 import b64decode
 from datetime import datetime, timezone
@@ -6,6 +7,7 @@ from zlib import decompress
 
 import numpy as np
 import requests
+from dotenv import load_dotenv
 
 
 def fetch_data(url: str, user: str, password: str) -> dict:
@@ -26,24 +28,35 @@ def fetch_data(url: str, user: str, password: str) -> dict:
     return response.json()
 
 
-def get_unix_timestamp(
-    year: int, month: int, day: int, hour: int, minute: int, second: int
-) -> int:
-    """Converts a UTC date and time to a Unix timestamp.
+def get_unix_timestamp(time_str: str) -> int:
+    """Converts a UTC date and time from an environment variable to a Unix timestamp.
 
     Parameters:
-    year (int): The year.
-    month (int): The month.
-    day (int): The day.
-    hour (int): The hour.
-    minute (int): The minute.
-    second (int): The second.
+    time_str (str): Date and time in the format 'DD-MM-YYYY HH:MM:SS'.
 
     Returns:
     int: The Unix timestamp.
     """
-    utc_time = datetime(year, month, day, hour, minute, second, tzinfo=timezone.utc)
+    utc_time = datetime.strptime(time_str, "%d-%m-%Y %H:%M:%S")
+    utc_time = utc_time.replace(tzinfo=timezone.utc)
     return int(utc_time.timestamp())
+
+
+def load_env_variables() -> tuple:
+    """Loads environment variables from .env file.
+
+    Returns:
+    tuple: A tuple containing user, password, device_ip, machine, point, pmode and time.
+    """
+    load_dotenv()
+    user = os.getenv("T8_USER")
+    password = os.getenv("T8_PASSWORD")
+    device_ip = os.getenv("DEVICE_IP")
+    machine = os.getenv("MACHINE")
+    point = os.getenv("POINT")
+    pmode = os.getenv("PMODE")
+    time = os.getenv("TIME")
+    return user, password, device_ip, machine, point, pmode, time
 
 
 def zint_to_float(raw: str) -> np.ndarray:
