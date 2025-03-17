@@ -1,6 +1,8 @@
 import numpy as np
+from scipy.fft import fft, fftfreq
 
 import utils.functions as fun
+from utils.spectrum import Spectrum
 
 
 class Waveform:
@@ -80,6 +82,37 @@ class Waveform:
         n = len(self.windowed_amps)
         padded_len = 2 ** np.ceil(np.log2(n)).astype(int)
         self.padded_amps = np.pad(self.windowed_amps, (0, padded_len - n), "constant")
+
+    def create_spectrum(self, fmin: float, fmax: float) -> Spectrum:
+        """Create the spectrum of a waveform.
+
+        Parameters:
+        fmin (float): The minimum frequency to consider.
+        fmax (float): The maximum frequency
+
+        Returns:
+        Spectrum: The spectrum of the waveform.
+        """
+        # Apply Hanning window
+        if self.windowed_amps is None:
+            self.hanning_window()
+
+        # Apply zero padding
+        if self.padded_amps is None:
+            self.zero_padding()
+
+        # Compute the FFT
+        amps = fft(self.padded_amps) * 2 * np.sqrt(2)
+        amps = np.abs(amps) / len(amps)
+        freqs = fftfreq(len(self.padded_amps), 1.0 / self.srate)  # Compute the freqs
+
+        # Create a Spectrum object
+        sp = Spectrum(freq=freqs, amp=amps)
+
+        # Filter frequencies within the given range
+        sp.apply_filter(fmin, fmax)
+
+        return sp
 
     def __repr__(self) -> str:
         """Visualization of the waveform.
