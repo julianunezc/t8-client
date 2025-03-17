@@ -1,12 +1,12 @@
 # Spectrum Comparator
 
-This project implements an algorithm to calculate the spectrum from a waveform and compare it with the spectrum obtained from the T8. The final result is a graph with the two spectra superimposed: the calculated one and the one obtained from the T8.
+This project implements an algorithm to calculate the spectrum from a waveform and compare it with the spectrum obtained from the T8. The result is a plot showing both spectra superimposed: the calculated one and the one obtained from the T8.
 
 ## Installation
 
 ### 1. Clone the repository
    ```bash
-   git https://github.com/julianunezc/T8Spectrum.git
+   git clone https://github.com/julianunezc/T8Spectrum.git
    cd T8Spectrum
    ```
 
@@ -15,6 +15,7 @@ This project implements an algorithm to calculate the spectrum from a waveform a
    ```bash
    curl -sSL https://install.python-poetry.org | python3 -
    ```
+
 ### 3. Install the dependencies
 With Poetry installed, you can now install the project dependencies. Simply run:
 
@@ -27,23 +28,27 @@ This will create a virtual environment and install all the required dependencies
 
 The project is organized into several directories and files:
 
-### 1. **Data Directory (`data\`)**
-   This folder contains the scripts for decoding both the spectrum and the waveform, as well as their respective CSV files and graphical representations. It also includes a script for timestamp conversion:
-   
-- **`spectrum_decode.py`**: Script to decode the spectrum data.
-- **`waveform_decode.py`**: Script to decode the waveform data.
-- **`timestamp.py`**: Script for converting timestamps from UTC to Unix format.
-- **`.csv`**: CSV files corresponding to the decoded spectrum and waveform.
-- **`.png`**: Graphical representations of the spectrum and waveform as PNG files.
+### 1. Main algorithm (`main.py`)
+   This file contains the core logic of the project. It handles the process of loading a waveform, generating its spectrum, and comparing it with the reference spectrum obtained from the T8 device. The key steps involved in this process are:
 
-### 2. **Core Directory (`spectra_comparator\`)**
-   This is the core module of the project, containing the main logic for calculating and comparing the spectra. It includes:
+- **Load the Waveform and T8 Spectrum Data**: The waveform data is loaded from API using the Waveform class, and the reference T8 spectrum is loaded using the Spectrum class.
 
-  - **`compare_spectra.py`**: The main script that calculates the spectrum from the waveform and compares it with the spectrum obtained from the T8. The output is a graph with both spectra superimposed.
+- **Define the frequency Range**: The frequency range is determined based on the minimum and maximum frequency values in the T8 spectrum.
+
+- **Calculate the Spectrum of the Waveform**: The waveform's spectrum is generated using the `wave.create_spectrum(fmin, fmax) ` method, which applies a Hanning window, zero-padding, and computes the Fast Fourier Transform (FFT). The calculated spectrum is filtered within a frequency range defined by the T8 spectrum.
+
+- **Plot the Spectra**: A plot is generated showing both the calculated waveform spectrum and the reference T8 spectrum, with the two spectra superimposed for easy comparison.
+
+### 2. Utils Directory (`utils\`)
+   This directory contains auxiliary modules that handle various tasks necessary for the spectrum comparison. It includes:
+
+  - **`functions.py`**: Contains helper functions for tasks such as extracting and converting data from the T8 API, handling environment variables, and other utility methods.
    
-  - **`waveform.py`**: Contains the `Waveform` class, which represents a waveform with attributes such as time, amplitude, sampling rate and windowed amplitude values. It includes a method to load waveform data from CSV file, apply a Hanning window to the waveform, and a string representation showing the waveform instance.
+  - **`waveform.py`**: Contains the `Waveform` class, which represents a waveform with attributes such as time, amplitude, sampling rate, and windowed and padded amplitude values. It includes a method to load waveform data from API, applies a Hanning window to the waveform, use a method to zero-pads the windowed waveform to increase frequency resolution in the FFT, and prints a string representation showing the waveform instance. The `create_spectrum()` method performs the FFT on the padded waveform, computes frequency and amplitude values, and returns a Spectrum object with the computed values.
+  
+      This class is essential for preparing the waveform data and calculating its frequency spectrum, which can then be compared with the T8 device's reference spectrum.
    
-   - **`spectrum.py`**: Contains the `Spectrum` class, which represents a spectrum with frequency values in Hz and their corresponding amplitudes. It includes methods to load spectrum data from CSV file and a string representation showing the frequency range in Hz and the number of samples.
+   - **`spectrum.py`**: Contains the `Spectrum` class, which represents a spectrum with frequency values in Hz and their corresponding amplitudes, along with filtered versions of those arrays used after applying frequency range filtering. It includes methods to load spectrum data from API, filter the frequency and amplitude arrays to keep only those within a specified range, and prints a string representation showing the frequency range in Hz and the number of samples.
 
 ### 3. Tests Directory (`tests\`)
 This folder contains the unit and integration tests for the project.
@@ -51,15 +56,11 @@ This folder contains the unit and integration tests for the project.
 
 ## Main Algorithm
 
-The core of the spectrum comparison algorithm is implemented in the `compare_two_spectra` function. The process involves the following key steps:
+The core of the spectrum comparison algorithm is implemented in the `main.py` script. The process involves the following key steps:
 
-- **Loading the Waveform and T8 Spectrum Data**: The waveform data is loaded from a CSV file using the Waveform class, and the reference T8 spectrum is loaded using the Spectrum class.
+- **Loading the Waveform and T8 Spectrum Data**: The waveform data is loaded from API using the Waveform class, and the reference T8 spectrum is loaded using the Spectrum class.
 
-- **Windowing and Zero Padding**: The waveform is windowed using a Hanning window, and zero padding is applied to increase frequency resolution.
-
-- **Fast Fourier Transform (FFT)**: The FFT is applied to the windowed and padded waveform to calculate the spectrum.
-
-- **Filtering Frequency Range**: The calculated spectrum is filtered to keep frequencies between 2.5 Hz and 2000 Hz for comparison purposes.
+- **Processing the Waveform**: The waveform undergoes processing to generate its frequency spectrum using the `create_spectrum()` method. The spectrum is calculated by applying a Hanning window and zero-padding to the waveform, then computing the Fast Fourier Transform (FFT). The calculated spectrum is filtered within a frequency range defined by the T8 spectrum.
 
 - **Comparison Plot**: A plot is generated showing both the calculated waveform spectrum and the reference T8 spectrum, with the two spectra superimposed for easy comparison.
 
@@ -69,20 +70,21 @@ This project requires the following environment variables to access T8 data. You
 
 - `T8_USER`: Username to access T8 data.
 - `T8_PASSWORD`: Password associated with the T8 user account
+- `DEVICE_IP`: The IP address of the T8 device.
+- `MACHINE`: The identifier or name of the machine being monitored by the T8 device.
+- `POINT`: The specific measurement point on the machine that is being monitored.
+- `PMODE`: The measurement mode or operational mode of the device or machine.
+- `TIME`: The specific timestamp (in the format 'DD-MM-YYYY HH:MM:SS').
 
-The main function (`main`) simply calls `compare_two_spectra` with predefined filenames, making it easy to execute the comparison. To run it and visualize the results:
+The main script (`main`) simply calls `compare_two_spectra`, making it easy to execute the comparison. To run it and visualize the results:
 
-1. Ensure you have the required waveform and spectrum data available in CSV format.
-- The waveform data should include time (t) and amplitude (amp) columns.
-- The spectrum data should include frequency (freq) and amplitude (amp) columns.
+1. Ensure you have the required environment variables.
 
-2. Place the waveform data CSV and the reference spectrum CSV into the `data\` folder.
+2. Place the .env file at the root directory of the project.
 3. Run the script:
 ```bash
-poetry run python spectra_comparator/compare_spectra.py
+poetry run python main.py
 ```
-
-By default, the script will use the filenames `wave_data.csv` and `spectrum_data.csv` located in the `data\` folder. If your files have different names, you can modify the wave_filename and t8_filename variables in the main() function inside the `compare_spectra.py` script.
 
 After running the script, a plot will be generated comparing the spectrum calculated from the waveform and the reference T8 spectrum.
 
