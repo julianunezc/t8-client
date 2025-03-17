@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from spectra_comparator.waveform import Waveform
+from utils.waveform import Waveform
 
 
 # Fixture for sample waveform
