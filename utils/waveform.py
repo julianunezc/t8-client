@@ -1,8 +1,6 @@
-import os
-
 import numpy as np
-from common import fetch_data, get_unix_timestamp, zint_to_float
-from dotenv import load_dotenv
+
+import utils.functions as fun
 
 
 class Waveform:
@@ -16,48 +14,37 @@ class Waveform:
         amp (np.ndarray): A numpy array containing the amplitude values of the waveform.
         srate (float): The sampling rate of the waveform.
         windowed_amps (np.ndarray): A numpy array containing
-                                    the windowed amplitude values.
+                                    the windowed amplitude values applying
+                                    a Hanning window.
+        padded_amps (np.ndarray): A numpy array containing the windowed waveform
+                                    with zero padding applied.
         """
         self.time = time
         self.amp = amp
         self.srate = srate
         self.windowed_amps = None
+        self.padded_amps = None
 
     @classmethod
-    def from_api(
-        cls, year: int, month: int, day: int, hour: int, minute: int, second: int
-    ):
+    def from_api(cls):
         """Loads waveform data from API using parameters stored in environment variables
         and returns a Waveform object.
 
-        Parameters:
-        year (int): The year.
-        month (int): The month.
-        day (int): The day.
-        hour (int): The hour.
-        minute (int): The minute.
-        second (int): The second.
 
         Returns:
         Waveform: A Waveform object with the data loaded from the API.
         """
-        # Get configuration values from .env
-        load_dotenv()
-        USER = os.getenv("T8_USER")
-        PASS = os.getenv("T8_PASSWORD")
-        DEVICE_IP = os.getenv("DEVICE_IP")
-        MACHINE = os.getenv("MACHINE")
-        POINT = os.getenv("POINT")
-        PMODE = os.getenv("PMODE")
+        # Get configuration values from .env file
+        USER, PASS, DEVICE_IP, MACHINE, POINT, PMODE, TIME = fun.load_env_variables()
 
         # Calculate Unix timestamp using the provided date and time
-        timestamp = get_unix_timestamp(year, month, day, hour, minute, second)
+        timestamp = fun.get_unix_timestamp(TIME)
 
         # API URL
         url = f"http://{DEVICE_IP}/rest/waves/{MACHINE}/{POINT}/{PMODE}/{timestamp}"
 
         # Fetch the waveform data from the API
-        r = fetch_data(url, USER, PASS)
+        r = fun.fetch_data(url, USER, PASS)
 
         # Process the waveform data
         srate = float(r["sample_rate"])
@@ -65,20 +52,34 @@ class Waveform:
         raw = r["data"]
 
         # Decode and convert the waveform data
-        wave = zint_to_float(raw)
+        wave = fun.zint_to_float(raw)
         wave *= factor
 
         # Create time array
         time = np.linspace(0, len(wave) / srate, len(wave)) * 1000  # Convert to ms
-
         return cls(time, wave, srate)
 
     def hanning_window(self):
         """Applies a Hanning window to the waveform.
-        Stores the windowed amplitude values."""
+
+        Returns:
+        Updates the windowed_amps attribute."""
         num_samples = len(self.amp)
         window = np.hanning(num_samples)
         self.windowed_amps = self.amp * window
+
+    def zero_padding(self):
+        """Apply zero padding to the windowed waveform.
+
+        Returns:
+        Updates the padded_amps attribute.
+        """
+        if self.windowed_amps is None:
+            raise ValueError("Waveform must be windowed before applying zero padding.")
+
+        n = len(self.windowed_amps)
+        padded_len = 2 ** np.ceil(np.log2(n)).astype(int)
+        self.padded_amps = np.pad(self.windowed_amps, (0, padded_len - n), "constant")
 
     def __repr__(self) -> str:
         """Visualization of the waveform.
