@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.fft import fft, fftfreq
 
-import utils.functions as fun
-from utils.spectrum import Spectrum
+import t8_spectrum.functions as fun
+from t8_spectrum.spectrum import Spectrum
 
 
 class Waveform:

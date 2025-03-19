@@ -1,6 +1,6 @@
 import numpy as np
 
-import utils.functions as fun
+import t8_spectrum.functions as fun
 
 
 class Spectrum:

@@ -7,8 +7,8 @@ the reference T8 spectrum on the same graph for comparison.
 
 import matplotlib.pyplot as plt
 
-from utils.spectrum import Spectrum
-from utils.waveform import Waveform
+from t8_spectrum.spectrum import Spectrum
+from t8_spectrum.waveform import Waveform
 
 
 def compare_two_spectra() -> None:
