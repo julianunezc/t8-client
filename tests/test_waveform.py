@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from t8_spectrum.waveform import Waveform
+from t8_client.waveform import Waveform
 
 
 # Fixture for sample waveform

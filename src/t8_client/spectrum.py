@@ -1,6 +1,6 @@
 import numpy as np
 
-import t8_spectrum.functions as fun
+import t8_client.functions as fun
 
 
 class Spectrum:
@@ -30,13 +30,13 @@ class Spectrum:
         Spectrum: A Spectrum object with the data loaded from the API.
         """
         # Get configuration values from .env
-        USER, PASS, DEVICE_IP, MACHINE, POINT, PMODE, TIME = fun.load_env_variables()
+        USER, PASS, HOST, MACHINE, POINT, PMODE, DATE = fun.load_env_variables()
 
         # Calculate Unix timestamp using the provided date and time
-        timestamp = fun.get_unix_timestamp(TIME)
+        timestamp = fun.get_unix_timestamp(DATE)
 
         # API URL
-        url = f"http://{DEVICE_IP}/rest/spectra/{MACHINE}/{POINT}/{PMODE}/{timestamp}"
+        url = f"http://{HOST}/rest/spectra/{MACHINE}/{POINT}/{PMODE}/{timestamp}"
 
         # Fetch the spectrum data from the API
         r = fun.fetch_data(url, USER, PASS)

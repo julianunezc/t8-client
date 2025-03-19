@@ -51,12 +51,12 @@ def load_env_variables() -> tuple:
     load_dotenv()
     user = os.getenv("T8_USER")
     password = os.getenv("T8_PASSWORD")
-    device_ip = os.getenv("DEVICE_IP")
+    host = os.getenv("HOST")
     machine = os.getenv("MACHINE")
     point = os.getenv("POINT")
     pmode = os.getenv("PMODE")
-    time = os.getenv("TIME")
-    return user, password, device_ip, machine, point, pmode, time
+    date = os.getenv("DATE")
+    return user, password, host, machine, point, pmode, date
 
 
 def zint_to_float(raw: str) -> np.ndarray:

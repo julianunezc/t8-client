@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.fft import fft, fftfreq
 
-import t8_spectrum.functions as fun
-from t8_spectrum.spectrum import Spectrum
+import t8_client.functions as fun
+from t8_client.spectrum import Spectrum
 
 
 class Waveform:
@@ -37,13 +37,13 @@ class Waveform:
         Waveform: A Waveform object with the data loaded from the API.
         """
         # Get configuration values from .env file
-        USER, PASS, DEVICE_IP, MACHINE, POINT, PMODE, TIME = fun.load_env_variables()
+        USER, PASS, HOST, MACHINE, POINT, PMODE, DATE = fun.load_env_variables()
 
         # Calculate Unix timestamp using the provided date and time
-        timestamp = fun.get_unix_timestamp(TIME)
+        timestamp = fun.get_unix_timestamp(DATE)
 
         # API URL
-        url = f"http://{DEVICE_IP}/rest/waves/{MACHINE}/{POINT}/{PMODE}/{timestamp}"
+        url = f"http://{HOST}/rest/waves/{MACHINE}/{POINT}/{PMODE}/{timestamp}"
 
         # Fetch the waveform data from the API
         r = fun.fetch_data(url, USER, PASS)
