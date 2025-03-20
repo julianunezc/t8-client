@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "t8spectrum"
+name = "t8-client"
 version = "0.1.0"
-description = "Calculates the spectrum from a waveform and compares it with the T8 output"
+description = "T8 client"
 authors = ["Julia <julianunezc@gmail.com>"]
 readme = "README.md"
 packages = [{include = "t8_client", from = "src"}]
@@ -30,6 +30,9 @@ select = [
     "I",   # isort
 ]
 ignore = []
+
+[tool.poetry.scripts]
+t8-client = "t8_client.cli:cli"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

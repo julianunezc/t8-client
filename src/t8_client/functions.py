@@ -42,6 +42,19 @@ def get_unix_timestamp_from_str(time_str: str) -> int:
     return int(utc_time.timestamp())
 
 
+def get_str_from_unix_timestamp(timestamp: int) -> str:
+    """Converts a Unix timestamp to a UTC date and time string.
+
+    Parameters:
+    timestamp (int): The Unix timestamp.
+
+    Returns:
+    str: The date and time in the format 'YYYY-MM-DDTHH:MM:SS'.
+    """
+    utc_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    return utc_time.strftime("%Y-%m-%dT%H:%M:%S")
+
+
 def load_env_variables() -> tuple:
     """Loads environment variables from .env file.
 
