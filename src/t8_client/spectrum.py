@@ -22,24 +22,29 @@ class Spectrum:
         self.filtered_amp = None
 
     @classmethod
-    def from_api(cls):
-        """Loads spectrum data from API using parameters stored in environment variables
-        and returns a Spectrum object.
+    def from_api(cls, machine: str, point: str, pmode: str, date: str):
+        """Loads spectrum data from API using the provided parameters.
+
+        Parameters:
+        machine (str): The machine identifier.
+        point (str): The point identifier.
+        pmode (str): The mode (e.g., AM1).
+        date (str): The date and time in 'DD-MM-YYYY HH:MM:SS' format.
 
         Returns:
         Spectrum: A Spectrum object with the data loaded from the API.
         """
         # Get configuration values from .env
-        USER, PASS, HOST, MACHINE, POINT, PMODE, DATE = fun.load_env_variables()
+        user, password, host = fun.load_env_variables()
 
         # Calculate Unix timestamp using the provided date and time
-        timestamp = fun.get_unix_timestamp(DATE)
+        timestamp = fun.get_unix_timestamp_from_str(date)
 
         # API URL
-        url = f"http://{HOST}/rest/spectra/{MACHINE}/{POINT}/{PMODE}/{timestamp}"
+        url = f"http://{host}/rest/spectra/{machine}/{point}/{pmode}/{timestamp}"
 
         # Fetch the spectrum data from the API
-        r = fun.fetch_data(url, USER, PASS)
+        r = fun.fetch_data(url, user, password)
 
         # Process the spectrum data
         fmin = r.get("min_freq", 0)

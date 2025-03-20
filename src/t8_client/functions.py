@@ -28,7 +28,7 @@ def fetch_data(url: str, user: str, password: str) -> dict:
     return response.json()
 
 
-def get_unix_timestamp(time_str: str) -> int:
+def get_unix_timestamp_from_str(time_str: str) -> int:
     """Converts a UTC date and time from an environment variable to a Unix timestamp.
 
     Parameters:
@@ -46,17 +46,13 @@ def load_env_variables() -> tuple:
     """Loads environment variables from .env file.
 
     Returns:
-    tuple: A tuple containing user, password, device_ip, machine, point, pmode and time.
+    tuple: A tuple containing user, password and host.
     """
     load_dotenv()
     user = os.getenv("T8_USER")
     password = os.getenv("T8_PASSWORD")
     host = os.getenv("HOST")
-    machine = os.getenv("MACHINE")
-    point = os.getenv("POINT")
-    pmode = os.getenv("PMODE")
-    date = os.getenv("DATE")
-    return user, password, host, machine, point, pmode, date
+    return user, password, host
 
 
 def zint_to_float(raw: str) -> np.ndarray:

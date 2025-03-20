@@ -28,25 +28,29 @@ class Waveform:
         self.padded_amps = None
 
     @classmethod
-    def from_api(cls):
-        """Loads waveform data from API using parameters stored in environment variables
-        and returns a Waveform object.
+    def from_api(cls, machine: str, point: str, pmode: str, date: str) -> "Waveform":
+        """Loads waveform data from API using the provided parameters.
 
+        Parameters:
+        machine (str): The machine identifier.
+        point (str): The point identifier.
+        pmode (str): The mode (e.g., AM1).
+        date (str): The date and time in 'DD-MM-YYYY HH:MM:SS' format.
 
         Returns:
         Waveform: A Waveform object with the data loaded from the API.
         """
         # Get configuration values from .env file
-        USER, PASS, HOST, MACHINE, POINT, PMODE, DATE = fun.load_env_variables()
+        user, password, host = fun.load_env_variables()
 
         # Calculate Unix timestamp using the provided date and time
-        timestamp = fun.get_unix_timestamp(DATE)
+        timestamp = fun.get_unix_timestamp_from_str(date)
 
         # API URL
-        url = f"http://{HOST}/rest/waves/{MACHINE}/{POINT}/{PMODE}/{timestamp}"
+        url = f"http://{host}/rest/waves/{machine}/{point}/{pmode}/{timestamp}"
 
         # Fetch the waveform data from the API
-        r = fun.fetch_data(url, USER, PASS)
+        r = fun.fetch_data(url, user, password)
 
         # Process the waveform data
         srate = float(r["sample_rate"])

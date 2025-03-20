@@ -11,15 +11,21 @@ from t8_client.spectrum import Spectrum
 from t8_client.waveform import Waveform
 
 
-def compare_two_spectra() -> None:
+def compare_two_spectra(machine: str, point: str, pmode: str, date: str) -> None:
     """Compares the spectrum of a waveform with a reference spectrum (T8).
+
+    Parameters:
+    machine (str): The machine identifier.
+    point (str): The point identifier.
+    pmode (str): The mode (e.g., AM1).
+    date (str): The date and time in 'DD-MM-YYYY HH:MM:SS' format.
 
     Returns:
     None: This function creates a plot comparing both spectra.
     """
     # Charge the waveform and the reference spectrum
-    wave = Waveform.from_api()
-    t8_spectrum = Spectrum.from_api()
+    wave = Waveform.from_api(machine, point, pmode, date)
+    t8_spectrum = Spectrum.from_api(machine, point, pmode, date)
 
     # Define the frequency range to consider
     fmin = t8_spectrum.freq.min()
@@ -60,7 +66,13 @@ def compare_two_spectra() -> None:
 
 def main():
     """Main function to compare the spectra of a wave and a reference T8 spectrum."""
-    compare_two_spectra()
+    # Define the parameters (machine, point, pmode, date)
+    machine = "LP_Turbine"
+    point = "MAD31CY005"
+    pmode = "AM1"
+    date = "11-04-2019 18:25:54"
+
+    compare_two_spectra(machine, point, pmode, date)
 
 
 if __name__ == "__main__":
