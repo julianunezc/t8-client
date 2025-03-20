@@ -43,7 +43,7 @@ def get_unix_timestamp_from_str(time_str: str) -> int:
 
 
 def get_str_from_unix_timestamp(timestamp: int) -> str:
-    """Converts a Unix timestamp to a UTC date and time string.
+    """Converts a Unix timestamp to a ISO date and time string.
 
     Parameters:
     timestamp (int): The Unix timestamp.
@@ -53,6 +53,34 @@ def get_str_from_unix_timestamp(timestamp: int) -> str:
     """
     utc_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
     return utc_time.strftime("%Y-%m-%dT%H:%M:%S")
+
+
+def get_timestamps(url: str, machine: str, point: str, pmode: str) -> list:
+    """Fetches the list of available waveform or spectrum timestamps from the API.
+
+    Parameters:
+    url (str): The URL to fetch the data.
+    machine (str): Machine name.
+    point (str): Point name.
+    pmode (str): Pmode value.
+
+    Returns:
+    list: A list of Unix timestamps extracted from the waveform or spectrum URLs.
+    """
+    # Get configuration values from .env file
+    user, password, _ = load_env_variables()
+
+    # Fetch the waveform data from the API
+    r = fetch_data(url, user, password)
+
+    timestamps = []
+    for item in r.get("_items", []):
+        url_self = item["_links"]["self"]  # Obtaining the corresponding URL
+        parts = url_self.split("/")  # URL parts
+        ts = parts[-1]  # Extracting last part of the URL
+        formatted_ts = get_str_from_unix_timestamp(int(ts))  # Converting to ISO format
+        timestamps.append(formatted_ts)
+    return timestamps
 
 
 def load_env_variables() -> tuple:

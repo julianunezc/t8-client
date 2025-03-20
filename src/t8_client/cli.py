@@ -1,7 +1,6 @@
 import click
 
 import t8_client.functions as fun
-from t8_client.waveform import Waveform
 
 
 @click.group()
@@ -19,18 +18,48 @@ def cli(ctx):
     ctx.obj["HOST"] = host
 
 
-@cli.command()
-@click.option("-M", "--machine", required=True, help="Machine name.")
-@click.option("-p", "--point", required=True, help="Point name.")
-@click.option("-m", "--pmode", required=True, help="Pmode value.")
-@click.pass_context
-def list_waves(ctx, machine, point, pmode):
-    """Lists the waveform capture dates for the specified machine, point, and pmode."""
-    timestamps = Waveform.get_waves_timestamps(machine, point, pmode)
+def common_options(func):
+    """Decorator to add common options: machine, point, and pmode."""
+    func = click.option("-M", "--machine", required=True, help="Machine name.")(func)
+    func = click.option("-p", "--point", required=True, help="Point name.")(func)
+    func = click.option("-m", "--pmode", required=True, help="Pmode value.")(func)
+    return func
 
+
+@cli.command()
+@click.pass_context
+@common_options
+def list_waves(ctx, machine, point, pmode):
+    """Lists the waveform capture dates for the specified machine, point, and pmode.
+
+    Parameters:
+    machine (str): Machine name.
+    point (str): Point name.
+    pmode (str): Pmode value.
+    """
+    # API URL
+    url = f"http://{ctx.obj['HOST']}/rest/waves/{machine}/{point}/{pmode}"
+    timestamps = fun.get_timestamps(url, machine, point, pmode)
     for ts in timestamps:
-        formatted_ts = fun.get_str_from_unix_timestamp(int(ts))
-        click.echo(formatted_ts)
+        click.echo(ts)
+
+
+@cli.command()
+@click.pass_context
+@common_options
+def list_spectra(ctx, machine, point, pmode):
+    """Lists the spectrum capture dates for the specified machine, point, and pmode.
+
+    Parameters:
+    machine (str): Machine name.
+    point (str): Point name.
+    pmode (str): Pmode value.
+    """
+    # API URL
+    url = f"http://{ctx.obj['HOST']}/rest/spectra/{machine}/{point}/{pmode}"
+    timestamps = fun.get_timestamps(url, machine, point, pmode)
+    for ts in timestamps:
+        click.echo(ts)
 
 
 if __name__ == "__main__":

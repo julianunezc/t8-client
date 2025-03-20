@@ -125,34 +125,3 @@ class Waveform:
         str: A string representation of the Waveform instance.
         """
         return f"Waveform(srate={self.srate}, duration={self.time[-1]}ms)"
-
-    @staticmethod
-    def get_waves_timestamps(machine: str, point: str, pmode: str) -> list:
-        """Fetches the list of available waveform timestamps from the API.
-
-        Parameters:
-        machine (str): Machine name.
-        point (str): Point name.
-        pmode (str): Pmode value.
-
-        Returns:
-        list: A list of Unix timestamps extracted from the waveform URLs.
-        """
-        # Get configuration values from .env file
-        user, password, host = fun.load_env_variables()
-
-        # API URL
-        url = f"http://{host}/rest/waves/{machine}/{point}/{pmode}"
-
-        # Fetch the waveform data from the API
-        r = fun.fetch_data(url, user, password)
-
-        timestamps = []
-        for item in r.get("_items", []):
-            url_self = item["_links"]["self"]  # Obtaining the corresponding URL
-
-            parts = url_self.split("/")  # URL parts
-            timestamp = parts[-1]  # Extracting last part of the URL
-            timestamps.append(timestamp)
-
-        return timestamps
