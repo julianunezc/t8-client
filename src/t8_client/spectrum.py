@@ -1,6 +1,7 @@
 import csv
 import os
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 import t8_client.functions as fun
@@ -70,16 +71,38 @@ class Spectrum:
         Parameters:
         filename (str): The name of the file where the spectrum data will be saved.
         """
-        output_directory = os.path.join(
-            os.path.dirname(__file__), "../../output/reports/"
-        )
-        filename = os.path.join(output_directory, filename)
-        os.makedirs(output_directory, exist_ok=True)
-        with open(filename, mode="w", newline="") as file:
+        output_dir = os.path.join(os.getcwd(), "output", "reports")
+        os.makedirs(output_dir, exist_ok=True)
+        file_path = os.path.join(output_dir, filename)
+
+        # Save data into a CSV file
+        with open(file_path, mode="w", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(["freq", "amp"])
             for freq, amp in zip(self.freq, self.amp):
                 writer.writerow([freq, amp])
+
+    def plot_data(self, filename: str = None):
+        """Plots and saves the waveform data (time vs amplitude) as a PNG.
+
+        Parameters:
+        filename (str): The name of the file where the plot will be saved as a PNG.
+        """
+        plt.figure(figsize=(10, 6))
+        plt.plot(self.freq, self.amp, label="Spectrum")
+        plt.xlim(0, max(self.freq))
+        plt.xlabel("Frequency (Hz)")
+        plt.ylabel("Amplitude")
+        plt.grid(True)
+        plt.title("Spectrum Data")
+        plt.legend()
+
+        output_dir = os.path.join(os.getcwd(), "output", "figures")
+        os.makedirs(output_dir, exist_ok=True)
+        file_path = os.path.join(output_dir, f"{filename}.png")
+
+        # Save the figure to the file as a PNG
+        plt.savefig(file_path, format="png")
 
     def apply_filter(self, fmin: float, fmax: float):
         """Filters the frequencies and amplitudes within a specified range.

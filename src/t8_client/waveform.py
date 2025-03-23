@@ -1,6 +1,7 @@
 import csv
 import os
 
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.fft import fft, fftfreq
 
@@ -73,17 +74,37 @@ class Waveform:
         The file is always saved in the './output/reports/' directory.
 
         Parameters:
-        filename (str): The name of the file where the data will be saved.
+        filename (str): The name of the file where the waveform data will be saved.
         """
-        output_directory = os.path.join(
-            os.path.dirname(__file__), "../../output/reports/"
-        )
-        filename = os.path.join(output_directory, filename)
-        os.makedirs(output_directory, exist_ok=True)
-        with open(filename, mode="w", newline="") as file:
+        output_dir = os.path.join(os.getcwd(), "output", "reports")
+        os.makedirs(output_dir, exist_ok=True)
+        file_path = os.path.join(output_dir, filename)
+
+        with open(file_path, mode="w", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(["time", "amp"])
             writer.writerows(zip(self.time, self.amp))
+
+    def plot_data(self, title: str = None, filename: str = None):
+        """Plots and saves the waveform data (time vs amplitude) as a PNG.
+
+        Parameters:
+        filename (str): The name of the file where the plot will be saved as a PNG.
+        """
+        plt.figure(figsize=(10, 6))
+        plt.plot(self.time, self.amp, label="Waveform")
+        plt.xlabel("Time (ms)")
+        plt.ylabel("Amplitude")
+        plt.grid(True)
+        plt.title("Waveform Data")
+        plt.legend()
+
+        output_dir = os.path.join(os.getcwd(), "output", "figures")
+        os.makedirs(output_dir, exist_ok=True)
+        file_path = os.path.join(output_dir, f"{filename}.png")
+
+        # Save the figure to the file
+        plt.savefig(file_path, format="png")
 
     def hanning_window(self):
         """Applies a Hanning window to the waveform.
