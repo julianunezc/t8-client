@@ -1,3 +1,6 @@
+import csv
+import os
+
 import numpy as np
 from scipy.fft import fft, fftfreq
 
@@ -64,6 +67,23 @@ class Waveform:
         # Create time array
         time = np.linspace(0, len(wave) / srate, len(wave)) * 1000  # Convert to ms
         return cls(time, wave, srate)
+
+    def save_to_csv(self, filename: str):
+        """Saves the time in ms and amplitude data of the waveform into a CSV file.
+        The file is always saved in the './output/reports/' directory.
+
+        Parameters:
+        filename (str): The name of the file where the data will be saved.
+        """
+        output_directory = os.path.join(
+            os.path.dirname(__file__), "../../output/reports/"
+        )
+        filename = os.path.join(output_directory, filename)
+        os.makedirs(output_directory, exist_ok=True)
+        with open(filename, mode="w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["time", "amp"])
+            writer.writerows(zip(self.time, self.amp))
 
     def hanning_window(self):
         """Applies a Hanning window to the waveform.

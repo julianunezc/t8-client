@@ -1,3 +1,6 @@
+import csv
+import os
+
 import numpy as np
 
 import t8_client.functions as fun
@@ -60,6 +63,24 @@ class Spectrum:
         freq = np.linspace(fmin, fmax, len(sp))
         return cls(freq, sp)
 
+    def save_to_csv(self, filename: str):
+        """Saves the frequencies in Hz and amplitudes of the spectrum into a CSV file.
+        The file is always saved in the './output/reports/' directory.
+
+        Parameters:
+        filename (str): The name of the file where the spectrum data will be saved.
+        """
+        output_directory = os.path.join(
+            os.path.dirname(__file__), "../../output/reports/"
+        )
+        filename = os.path.join(output_directory, filename)
+        os.makedirs(output_directory, exist_ok=True)
+        with open(filename, mode="w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["freq", "amp"])
+            for freq, amp in zip(self.freq, self.amp):
+                writer.writerow([freq, amp])
+
     def apply_filter(self, fmin: float, fmax: float):
         """Filters the frequencies and amplitudes within a specified range.
 
@@ -79,7 +100,6 @@ class Spectrum:
 
         Returns:
         str: A string representation of the Spectrum instance.
-
         """
         return (
             f"Spectrum(freq_range=({self.freq[0]:.2f}Hz, {self.freq[-1]:.2f}Hz), "
