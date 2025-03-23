@@ -28,21 +28,21 @@ def fetch_data(url: str, user: str, password: str) -> dict:
     return response.json()
 
 
-def get_unix_timestamp_from_str(time_str: str) -> int:
-    """Converts a UTC date and time from an environment variable to a Unix timestamp.
+def get_unix_timestamp_from_iso(time_str: str) -> int:
+    """Converts a ISO date and time string to a Unix timestamp.
 
     Parameters:
-    time_str (str): Date and time in the format 'DD-MM-YYYY HH:MM:SS'.
+    time_str (str): Date and time in the format 'YYYY-MM-DDTHH:MM:SS'.
 
     Returns:
     int: The Unix timestamp.
     """
-    utc_time = datetime.strptime(time_str, "%d-%m-%Y %H:%M:%S")
-    utc_time = utc_time.replace(tzinfo=timezone.utc)
-    return int(utc_time.timestamp())
+    dt = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
+    dt = dt.replace(tzinfo=timezone.utc)
+    return int(dt.timestamp())
 
 
-def get_str_from_unix_timestamp(timestamp: int) -> str:
+def get_iso_from_unix_timestamp(timestamp: int) -> str:
     """Converts a Unix timestamp to a ISO date and time string.
 
     Parameters:
@@ -51,8 +51,8 @@ def get_str_from_unix_timestamp(timestamp: int) -> str:
     Returns:
     str: The date and time in the format 'YYYY-MM-DDTHH:MM:SS'.
     """
-    utc_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-    return utc_time.strftime("%Y-%m-%dT%H:%M:%S")
+    iso_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    return iso_time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def get_timestamps(url: str, machine: str, point: str, pmode: str) -> list:
@@ -65,7 +65,7 @@ def get_timestamps(url: str, machine: str, point: str, pmode: str) -> list:
     pmode (str): Pmode value.
 
     Returns:
-    list: A list of Unix timestamps extracted from the waveform or spectrum URLs.
+    list: A list of timestamps in the format 'YYYY-MM-DDTHH:MM:SS'.
     """
     # Get configuration values from .env file
     user, password, _ = load_env_variables()
@@ -78,7 +78,7 @@ def get_timestamps(url: str, machine: str, point: str, pmode: str) -> list:
         url_self = item["_links"]["self"]  # Obtaining the corresponding URL
         parts = url_self.split("/")  # URL parts
         ts = parts[-1]  # Extracting last part of the URL
-        formatted_ts = get_str_from_unix_timestamp(int(ts))  # Converting to ISO format
+        formatted_ts = get_iso_from_unix_timestamp(int(ts))  # Converting to ISO format
         timestamps.append(formatted_ts)
     return timestamps
 

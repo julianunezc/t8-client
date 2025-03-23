@@ -2,7 +2,7 @@ import numpy as np
 from scipy.fft import fft, fftfreq
 
 import t8_client.functions as fun
-from t8_client.spectrum import Spectrum
+from t8_client.spectrum import Spectrum as sp
 
 
 class Waveform:
@@ -28,14 +28,14 @@ class Waveform:
         self.padded_amps = None
 
     @classmethod
-    def from_api(cls, machine: str, point: str, pmode: str, date: str) -> "Waveform":
+    def from_api(cls, machine: str, point: str, pmode: str, date: str):
         """Loads waveform data from API using the provided parameters.
 
         Parameters:
         machine (str): The machine identifier.
         point (str): The point identifier.
         pmode (str): The mode (e.g., AM1).
-        date (str): The date and time in 'DD-MM-YYYY HH:MM:SS' format.
+        date (str): The date and time in 'YYYY-MM-DDTHH:MM:SS' format.
 
         Returns:
         Waveform: A Waveform object with the data loaded from the API.
@@ -44,7 +44,7 @@ class Waveform:
         user, password, host = fun.load_env_variables()
 
         # Calculate Unix timestamp using the provided date and time
-        timestamp = fun.get_unix_timestamp_from_str(date)
+        timestamp = fun.get_unix_timestamp_from_iso(date)
 
         # API URL
         url = f"http://{host}/rest/waves/{machine}/{point}/{pmode}/{timestamp}"
@@ -69,13 +69,14 @@ class Waveform:
         """Applies a Hanning window to the waveform.
 
         Returns:
-        Updates the windowed_amps attribute."""
+        Updates the windowed_amps attribute.
+        """
         num_samples = len(self.amp)
         window = np.hanning(num_samples)
         self.windowed_amps = self.amp * window
 
     def zero_padding(self):
-        """Apply zero padding to the windowed waveform.
+        """Applies zero padding to the windowed waveform.
 
         Returns:
         Updates the padded_amps attribute.
@@ -87,12 +88,12 @@ class Waveform:
         padded_len = 2 ** np.ceil(np.log2(n)).astype(int)
         self.padded_amps = np.pad(self.windowed_amps, (0, padded_len - n), "constant")
 
-    def create_spectrum(self, fmin: float, fmax: float) -> Spectrum:
-        """Create the spectrum of a waveform.
+    def create_spectrum(self, fmin: float, fmax: float) -> sp:
+        """Creates the spectrum of a waveform.
 
         Parameters:
         fmin (float): The minimum frequency to consider.
-        fmax (float): The maximum frequency
+        fmax (float): The maximum frequency to consider.
 
         Returns:
         Spectrum: The spectrum of the waveform.
@@ -111,12 +112,12 @@ class Waveform:
         freqs = fftfreq(len(self.padded_amps), 1.0 / self.srate)  # Compute the freqs
 
         # Create a Spectrum object
-        sp = Spectrum(freq=freqs, amp=amps)
+        spectrum = sp(freq=freqs, amp=amps)
 
         # Filter frequencies within the given range
-        sp.apply_filter(fmin, fmax)
+        spectrum.apply_filter(fmin, fmax)
 
-        return sp
+        return spectrum
 
     def __repr__(self) -> str:
         """Visualization of the waveform.

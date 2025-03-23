@@ -29,7 +29,7 @@ class Spectrum:
         machine (str): The machine identifier.
         point (str): The point identifier.
         pmode (str): The mode (e.g., AM1).
-        date (str): The date and time in 'DD-MM-YYYY HH:MM:SS' format.
+        date (str): The date and time in 'YYYY-MM-DDTHH:MM:SS' format.
 
         Returns:
         Spectrum: A Spectrum object with the data loaded from the API.
@@ -38,7 +38,7 @@ class Spectrum:
         user, password, host = fun.load_env_variables()
 
         # Calculate Unix timestamp using the provided date and time
-        timestamp = fun.get_unix_timestamp_from_str(date)
+        timestamp = fun.get_unix_timestamp_from_iso(date)
 
         # API URL
         url = f"http://{host}/rest/spectra/{machine}/{point}/{pmode}/{timestamp}"
