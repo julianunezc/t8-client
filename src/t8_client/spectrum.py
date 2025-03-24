@@ -11,14 +11,20 @@ class Spectrum:
     """A class to represent a spectrum."""
 
     def __init__(self, freq: np.ndarray, amp: np.ndarray):
-        """Initializes a Spectrum object with frequency and amplitude arrays.
+        """
+        Initializes a Spectrum object with frequency and amplitude arrays.
 
-        Parameters:
-        freq (np.ndarray): Contains the frequency values (in Hz).
-        amp (np.ndarray): Contains the amplitude values corresponding to the freqs.
-        filtered_freq (np.ndarray): Contains the filtered frequency values (in Hz).
-        filtered_amp (np.ndarray): Contains the filtered amplitude values
-                                    corresponding to the freqs.
+        Parameters
+        ----------
+        freq : np.ndarray
+            Contains the frequency values (in Hz).
+        amp : np.ndarray
+            Contains the amplitude values corresponding to the frequencies.
+        filtered_freq : np.ndarray, optional
+            Contains the filtered frequency values (in Hz), initialized as None.
+        filtered_amp : np.ndarray, optional
+            Contains the filtered amplitude values corresponding to the frequencies,
+            initialized as None.
         """
         self.freq = freq
         self.amp = amp
@@ -26,21 +32,41 @@ class Spectrum:
         self.filtered_amp = None
 
     @classmethod
-    def from_api(cls, machine: str, point: str, pmode: str, date: str):
-        """Loads spectrum data from API using the provided parameters.
-
-        Parameters:
-        machine (str): The machine identifier.
-        point (str): The point identifier.
-        pmode (str): The mode (e.g., AM1).
-        date (str): The date and time in 'YYYY-MM-DDTHH:MM:SS' format.
-
-        Returns:
-        Spectrum: A Spectrum object with the data loaded from the API.
+    def from_api(
+        cls,
+        user: str,
+        passw: str,
+        host: str,
+        machine: str,
+        point: str,
+        pmode: str,
+        date: str,
+    ):
         """
-        # Get configuration values from .env
-        user, password, host = fun.load_env_variables()
+        Loads spectrum data from API using the provided parameters.
 
+        Parameters
+        ----------
+        user : str
+            User to connect with.
+        passw : str
+            Password to connect with.
+        host : str
+            The host address of the API.
+        machine : str
+            Machine tag.
+        point : str
+            Point tag.
+        pmode : str
+            Processing mode tag.
+        date : str
+            Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+
+        Returns
+        -------
+        Spectrum
+            A Spectrum object with the data loaded from the API.
+        """
         # Calculate Unix timestamp using the provided date and time
         timestamp = fun.get_unix_timestamp_from_iso(date)
 
@@ -48,7 +74,7 @@ class Spectrum:
         url = f"http://{host}/rest/spectra/{machine}/{point}/{pmode}/{timestamp}"
 
         # Fetch the spectrum data from the API
-        r = fun.fetch_data(url, user, password)
+        r = fun.fetch_data(url, user, passw)
 
         # Process the spectrum data
         fmin = r.get("min_freq", 0)
@@ -65,11 +91,14 @@ class Spectrum:
         return cls(freq, sp)
 
     def save_to_csv(self, filename: str):
-        """Saves the frequencies in Hz and amplitudes of the spectrum into a CSV file.
+        """
+        Saves the frequencies in Hz and amplitudes of the spectrum into a CSV file.
         The file is always saved in the './output/reports/' directory.
 
-        Parameters:
-        filename (str): The name of the file where the spectrum data will be saved.
+        Parameters
+        ----------
+        filename : str
+            The name of the file where the spectrum data will be saved.
         """
         output_dir = os.path.join(os.getcwd(), "output", "reports")
         os.makedirs(output_dir, exist_ok=True)
@@ -82,11 +111,15 @@ class Spectrum:
             for freq, amp in zip(self.freq, self.amp):
                 writer.writerow([freq, amp])
 
-    def plot_data(self, filename: str = None):
-        """Plots and saves the waveform data (time vs amplitude) as a PNG.
+    def plot_data(self, filename: str):
+        """
+        Plots and saves the spectrum data (frequency vs amplitude) as a PNG.
+        The file is always saved in the './output/figures/' directory.
 
-        Parameters:
-        filename (str): The name of the file where the plot will be saved as a PNG.
+        Parameters
+        ----------
+        filename : str
+            The name of the file where the spectrum plot will be saved as a PNG.
         """
         plt.figure(figsize=(10, 6))
         plt.plot(self.freq, self.amp, label="Spectrum")
@@ -105,24 +138,29 @@ class Spectrum:
         plt.savefig(file_path, format="png")
 
     def apply_filter(self, fmin: float, fmax: float):
-        """Filters the frequencies and amplitudes within a specified range.
+        """
+        Filters the frequencies and amplitudes within a specified range and
+        updates the filtered_freq and filtered_amp attributes.
 
-        Parameters:
-        fmin (float): The minimum frequency for filtering.
-        fmax (float): The maximum frequency for filtering.
-
-        Returns:
-        Updates the filtered_freq and filtered_amp attributes.
+        Parameters
+        ----------
+        fmin : float
+            The minimum frequency for filtering.
+        fmax : float
+            The maximum frequency for filtering.
         """
         filter_mask = (self.freq >= fmin) & (self.freq <= fmax)
         self.filtered_freq = self.freq[filter_mask]
         self.filtered_amp = self.amp[filter_mask]
 
     def __repr__(self) -> str:
-        """Visualization of the spectrum.
+        """
+        Visualization of the spectrum.
 
-        Returns:
-        str: A string representation of the Spectrum instance.
+        Returns
+        -------
+        str
+            A string representation of the Spectrum instance.
         """
         return (
             f"Spectrum(freq_range=({self.freq[0]:.2f}Hz, {self.freq[-1]:.2f}Hz), "

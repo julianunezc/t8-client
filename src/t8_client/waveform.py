@@ -13,17 +13,23 @@ class Waveform:
     """A class to represent a waveform."""
 
     def __init__(self, time: np.ndarray, amp: np.ndarray, srate: float):
-        """Initializes a Waveform object with time and amplitude arrays.
+        """
+        Initializes a Waveform object with time and amplitude arrays.
 
-        Attributes:
-        time (np.ndarray): A numpy array containing the time values of the waveform.
-        amp (np.ndarray): A numpy array containing the amplitude values of the waveform.
-        srate (float): The sampling rate of the waveform.
-        windowed_amps (np.ndarray): A numpy array containing
-                                    the windowed amplitude values applying
-                                    a Hanning window.
-        padded_amps (np.ndarray): A numpy array containing the windowed waveform
-                                    with zero padding applied.
+        Parameters
+        ----------
+        time : np.ndarray
+            Contains the time values of the waveform.
+        amp : np.ndarray
+            Contains the amplitude values of the waveform.
+        srate : float
+            The sampling rate of the waveform.
+        windowed_amps : np.ndarray, optional
+            Contains the windowed amplitude values applying
+            a Hanning window, initialized as None.
+        padded_amps : np.ndarray, optional
+            Contains the windowed waveform with zero padding applied,
+            initialized as None.
         """
         self.time = time
         self.amp = amp
@@ -32,21 +38,41 @@ class Waveform:
         self.padded_amps = None
 
     @classmethod
-    def from_api(cls, machine: str, point: str, pmode: str, date: str):
-        """Loads waveform data from API using the provided parameters.
-
-        Parameters:
-        machine (str): The machine identifier.
-        point (str): The point identifier.
-        pmode (str): The mode (e.g., AM1).
-        date (str): The date and time in 'YYYY-MM-DDTHH:MM:SS' format.
-
-        Returns:
-        Waveform: A Waveform object with the data loaded from the API.
+    def from_api(
+        cls,
+        user: str,
+        passw: str,
+        host: str,
+        machine: str,
+        point: str,
+        pmode: str,
+        date: str,
+    ):
         """
-        # Get configuration values from .env file
-        user, password, host = fun.load_env_variables()
+        Loads waveform data from API using the provided parameters.
 
+        Parameters
+        ----------
+        user : str
+            User to connect with.
+        passw : str
+            Password to connect with.
+        host : str
+            The host address of the API.
+        machine : str
+            Machine tag.
+        point : str
+            Point tag.
+        pmode : str
+            Processing mode tag.
+        date : str
+            Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+
+        Returns
+        -------
+        Waveform
+            A Waveform object with the data loaded from the API.
+        """
         # Calculate Unix timestamp using the provided date and time
         timestamp = fun.get_unix_timestamp_from_iso(date)
 
@@ -54,7 +80,7 @@ class Waveform:
         url = f"http://{host}/rest/waves/{machine}/{point}/{pmode}/{timestamp}"
 
         # Fetch the waveform data from the API
-        r = fun.fetch_data(url, user, password)
+        r = fun.fetch_data(url, user, passw)
 
         # Process the waveform data
         srate = float(r["sample_rate"])
@@ -70,11 +96,14 @@ class Waveform:
         return cls(time, wave, srate)
 
     def save_to_csv(self, filename: str):
-        """Saves the time in ms and amplitude data of the waveform into a CSV file.
+        """
+        Saves the time in ms and amplitude data of the waveform into a CSV file.
         The file is always saved in the './output/reports/' directory.
 
-        Parameters:
-        filename (str): The name of the file where the waveform data will be saved.
+        Parameters
+        ----------
+        filename : str
+            The name of the file where the waveform data will be saved.
         """
         output_dir = os.path.join(os.getcwd(), "output", "reports")
         os.makedirs(output_dir, exist_ok=True)
@@ -85,11 +114,15 @@ class Waveform:
             writer.writerow(["time", "amp"])
             writer.writerows(zip(self.time, self.amp))
 
-    def plot_data(self, title: str = None, filename: str = None):
-        """Plots and saves the waveform data (time vs amplitude) as a PNG.
+    def plot_data(self, filename: str):
+        """
+        Plots and saves the waveform data (time vs amplitude) as a PNG.
+        The file is always saved in the './output/figures/' directory.
 
-        Parameters:
-        filename (str): The name of the file where the plot will be saved as a PNG.
+        Parameters
+        ----------
+        filename : str
+            The name of the file where the waveform plot will be saved as a PNG.
         """
         plt.figure(figsize=(10, 6))
         plt.plot(self.time, self.amp, label="Waveform")
@@ -107,20 +140,18 @@ class Waveform:
         plt.savefig(file_path, format="png")
 
     def hanning_window(self):
-        """Applies a Hanning window to the waveform.
-
-        Returns:
-        Updates the windowed_amps attribute.
+        """
+        Applies a Hanning window to the waveform and
+        updates the windowed_amps attribute.
         """
         num_samples = len(self.amp)
         window = np.hanning(num_samples)
         self.windowed_amps = self.amp * window
 
     def zero_padding(self):
-        """Applies zero padding to the windowed waveform.
-
-        Returns:
-        Updates the padded_amps attribute.
+        """
+        Applies zero padding to the windowed waveform
+        and updates the padded_amps attribute.
         """
         if self.windowed_amps is None:
             raise ValueError("Waveform must be windowed before applying zero padding.")
@@ -130,14 +161,20 @@ class Waveform:
         self.padded_amps = np.pad(self.windowed_amps, (0, padded_len - n), "constant")
 
     def create_spectrum(self, fmin: float, fmax: float) -> sp:
-        """Creates the spectrum of a waveform.
+        """
+        Creates the spectrum of a waveform.
 
-        Parameters:
-        fmin (float): The minimum frequency to consider.
-        fmax (float): The maximum frequency to consider.
+        Parameters
+        ----------
+        fmin : float
+            The minimum frequency for filtering.
+        fmax : float
+            The maximum frequency for filtering.
 
-        Returns:
-        Spectrum: The spectrum of the waveform.
+        Returns
+        -------
+        Spectrum
+            The spectrum of the waveform.
         """
         # Apply Hanning window
         if self.windowed_amps is None:
@@ -161,9 +198,12 @@ class Waveform:
         return spectrum
 
     def __repr__(self) -> str:
-        """Visualization of the waveform.
+        """
+        Visualization of the waveform.
 
-        Returns:
-        str: A string representation of the Waveform instance.
+        Returns
+        -------
+        str
+            A string representation of the Waveform instance.
         """
         return f"Waveform(srate={self.srate}, duration={self.time[-1]}ms)"
