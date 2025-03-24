@@ -32,7 +32,7 @@ select = [
 ignore = []
 
 [tool.poetry.scripts]
-t8-client = "t8_client.cli:cli"
+t8-client = "t8_client.main:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

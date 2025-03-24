@@ -1,4 +1,16 @@
-import os
+"""
+This script accumulates all necessary functions for the execution of
+`main.py` and `compare_spectra.py`.
+
+This file contains the following functions:
+
+    * fetch_data - fetches data from the API with authentication.
+    * get_unix_timestamp_from_iso - converts an ISO 8601 string to a Unix timestamp.
+    * get_iso_from_unix_timestamp - converts a Unix timestamp to an ISO 8601 string.
+    * get_timestamps - retrieves available waveform or spectrum timestamps.
+    * zint_to_float - decodes a ZINT-encoded string into a NumPy array of floats.
+"""
+
 import sys
 from base64 import b64decode
 from datetime import datetime, timezone
@@ -7,21 +19,32 @@ from zlib import decompress
 
 import numpy as np
 import requests
-from dotenv import load_dotenv
 
 
-def fetch_data(url: str, user: str, password: str) -> dict:
-    """Fetches the data from the API.
-
-    Parameters:
-    url (str): The URL of the API.
-    user (str): The username for the API.
-    password (str): The password for the API.
-
-    Returns:
-    dict: The JSON response from the API.
+def fetch_data(url: str, user: str, passw: str) -> dict:
     """
-    response = requests.get(url, auth=(user, password))
+    Fetches the data from the API.
+
+    Parameters
+    ----------
+    url : str
+        The URL of the API to fetch data from.
+    user : str
+        User to connect with.
+    passw : str
+        Password to connect with.
+
+    Returns
+    -------
+    dict
+        The JSON response from the API as a dictionary.
+
+    Raises
+    ------
+    SystemExit
+        If the response status code is not 200, the function exits the program.
+    """
+    response = requests.get(url, auth=(user, passw))
     if response.status_code != 200:
         print(f"Error getting data. Status code: {response.status_code}")
         sys.exit(1)
@@ -29,13 +52,18 @@ def fetch_data(url: str, user: str, password: str) -> dict:
 
 
 def get_unix_timestamp_from_iso(time_str: str) -> int:
-    """Converts a ISO date and time string to a Unix timestamp.
+    """
+    Converts an ISO 8601 date and time string to a Unix timestamp.
 
-    Parameters:
-    time_str (str): Date and time in the format 'YYYY-MM-DDTHH:MM:SS'.
+    Parameters
+    ----------
+    time_str : str
+        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
 
-    Returns:
-    int: The Unix timestamp.
+    Returns
+    -------
+    int
+        The Unix timestamp representing the given date and time.
     """
     dt = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
     dt = dt.replace(tzinfo=timezone.utc)
@@ -43,35 +71,43 @@ def get_unix_timestamp_from_iso(time_str: str) -> int:
 
 
 def get_iso_from_unix_timestamp(timestamp: int) -> str:
-    """Converts a Unix timestamp to a ISO date and time string.
+    """
+    Converts a Unix timestamp to an ISO 8601 date and time string.
 
-    Parameters:
-    timestamp (int): The Unix timestamp.
+    Parameters
+    ----------
+    timestamp : int
+        The Unix timestamp to convert.
 
-    Returns:
-    str: The date and time in the format 'YYYY-MM-DDTHH:MM:SS'.
+    Returns
+    -------
+    str
+        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
     """
     iso_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
     return iso_time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-def get_timestamps(url: str, machine: str, point: str, pmode: str) -> list:
-    """Fetches the list of available waveform or spectrum timestamps from the API.
-
-    Parameters:
-    url (str): The URL to fetch the data.
-    machine (str): Machine name.
-    point (str): Point name.
-    pmode (str): Pmode value.
-
-    Returns:
-    list: A list of timestamps in the format 'YYYY-MM-DDTHH:MM:SS'.
+def get_timestamps(url: str, user: str, passw: str) -> list:
     """
-    # Get configuration values from .env file
-    user, password, _ = load_env_variables()
+    Fetches the list of available waveform or spectrum timestamps from the API.
 
+    Parameters
+    ----------
+    url : str
+        The URL of the API to fetch data from.
+    user : str
+        User to connect with.
+    passw : str
+        Password to connect with.
+
+    Returns
+    -------
+    list
+        A list of timestamps in the format 'YYYY-MM-DDTHH:MM:SS'.
+    """
     # Fetch the waveform data from the API
-    r = fetch_data(url, user, password)
+    r = fetch_data(url, user, passw)
 
     timestamps = []
     for item in r.get("_items", []):
@@ -83,27 +119,19 @@ def get_timestamps(url: str, machine: str, point: str, pmode: str) -> list:
     return timestamps
 
 
-def load_env_variables() -> tuple:
-    """Loads environment variables from .env file.
-
-    Returns:
-    tuple: A tuple containing user, password and host.
-    """
-    load_dotenv()
-    user = os.getenv("T8_USER")
-    password = os.getenv("T8_PASSWORD")
-    host = os.getenv("HOST")
-    return user, password, host
-
-
 def zint_to_float(raw: str) -> np.ndarray:
-    """Converts a ZINT-encoded string to a numpy array of floats.
+    """
+    Converts a ZINT-encoded string to a numpy array of floats.
 
-    Parameters:
-    raw (str): A ZINT-encoded string.
+    Parameters
+    ----------
+    raw : str
+        A ZINT-encoded string (base64 encoded compressed string).
 
-    Returns:
-    np.ndarray: A numpy array of floats.
+    Returns
+    -------
+    np.ndarray
+        A numpy array of floats decoded from the ZINT-encoded string.
     """
     d = decompress(b64decode(raw.encode()))
     return np.array(
