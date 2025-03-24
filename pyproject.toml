@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "T8 client"
 authors = ["Julia <julianunezc@gmail.com>"]
 readme = "README.md"
-packages = [{include = "t8_client", from = "src"}]
+packages = [
+    {include = "t8_client", from = "src"},
+    {include = "spectra_comparison", from = "src"}  # Agrega esta línea
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
