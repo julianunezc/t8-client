@@ -34,12 +34,18 @@ def compare_two_spectra(machine: str, point: str, pmode: str, date: str) -> None
     date : str
         Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
     """
+    params = {
+        "user": os.getenv("USER"),
+        "passw": os.getenv("PASSW"),
+        "host": os.getenv("HOST"),
+        "machine": machine,
+        "point": point,
+        "pmode": pmode,
+        "date": date,
+    }
     # Charge the waveform and the reference spectrum
-    user = os.getenv("USER")
-    passw = os.getenv("PASSW")
-    host = os.getenv("HOST")
-    wave = Wf.from_api(user, passw, host, machine, point, pmode, date)
-    t8_spectrum = Sp.from_api(user, passw, host, machine, point, pmode, date)
+    wave = Wf.from_api(params)
+    t8_spectrum = Sp.from_api(params)
 
     # Define the frequency range to consider
     fmin = t8_spectrum.freq.min()
