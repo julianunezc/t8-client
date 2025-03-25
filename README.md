@@ -1,92 +1,130 @@
-# Spectrum Comparator
+# T8 Client
 
-This project implements an algorithm to calculate the spectrum from a waveform and compare it with the spectrum obtained from the T8. The result is a plot showing both spectra superimposed: the calculated one and the one obtained from the T8.
+Este repositorio contiene una aplicación de línea de comandos *(CLI)* que permite interactuar con la API del **T8** y realizar ciertas acciones como obtener y graficar formas de onda y espectros. Además, el repositorio incluye un script que implementa un algoritmo para comparar un espectro calculado a partir de una forma de onda con el obtenido directamente del **T8**.
 
-## Installation
+## Instalación
 
-### 1. Clone the repository
+### 1. Clonar el repositorio
    ```bash
-   git clone https://github.com/julianunezc/T8Spectrum.git
-   cd T8Spectrum
+   git clone https://github.com/julianunezc/t8-client.git
+   cd t8-client
    ```
 
-### 2. Install Poetry
-
+### 2. Instalar Poetry
+   Si no tienes **Poetry** instalado, puedes hacerlo con el siguiente comando:
    ```bash
    curl -sSL https://install.python-poetry.org | python3 -
    ```
 
-### 3. Install the dependencies
-With Poetry installed, you can now install the project dependencies. Simply run:
+### 3. Instalar dependencias
+   Con Poetry instalado, ejecuta el siguiente comando para instalar las dependencias del proyecto:
+   ```bash
+   poetry install
+   ```
+   Esto creará un entorno virtual e instalará todas las dependencias definidas en el archivo `pyproject.toml`.
 
+## Estructura del proyecto
+
+El proyecto está organizado de la siguiente manera:
+
+- `t8-client/`  
+  Directorio raíz del proyecto.
+
+  - `src/`  
+    Contiene el código fuente del proyecto.
+
+    - `t8-client/`  
+      Paquete principal que contiene la lógica de la CLI.
+
+      - `main.py`  
+        Punto de entrada de la CLI. Permite listar los timestamps disponibles para capturas de formas de onda/espectros, obtener datos de una forma de onda/espectro para un timestamp dado y guardarlos en CSV o PNG.
+      - `spectrum.py`  
+        Módulo para manejar espectros. La clase `Spectrum` representa un espectro, e incluye métodos para cargar, guardar, graficar y filtrar espectros.
+      - `waveform.py`  
+        Módulo para manejar formas de onda. La clase `Waveform` representa una forma de onda, e incluye métodos para cargar, guardar y graficar formas de onda, aplicar ventanas de Hanning y generar un espectro a partir de una forma de onda, entre otros.
+      - `functions.py`  
+        Funciones auxiliares comunes con las que se obtienen datos de la API, se convierte una cadena ISO 8601 a un timestamp Unix y viceversa, se recuperan los timestamps disponibles para formas de onda/espectros y se decodifica una cadena codificada en ZINT.
+
+    - `spectra_comparison/`  
+      Módulo para la comparación de espectros.
+
+      - `compare_spectra.py`  
+        Script que compara graficando un espectro calculado a partir de una forma de onda con el obtenido del **T8**.
+
+  - `output/`  
+    Directorio donde se almacenan los resultados generados.
+
+    - `figures/`  
+      Contiene los gráficos generados.
+
+    - `reports/`  
+      Contiene los archivos CSV generados.
+
+  - `tests/`  
+    Contiene las pruebas del proyecto.
+
+## Ejecución del proyecto
+
+### 1. Ejecutar el script de comparación de espectros
+El script `compare_spectra.py` necesita acceso a la API del **T8**, por lo que **debes configurar las variables de entorno** antes de ejecutarlo.
+
+Para ello, crea un archivo `.env` en la raíz del proyecto con el siguiente contenido (reemplazando los valores según tu configuración):
 ```bash
-poetry install
+USER=tu_usuario
+PASSW=tu_contraseña
+HOST=direccion_del_api
 ```
-This will create a virtual environment and install all the required dependencies defined in the `pyproject.toml` file.
-
-## Project Structure
-
-The project is organized into several directories and files:
-
-### 1. Main algorithm (`main.py`)
-   This file contains the core logic of the project. It handles the process of loading a waveform, generating its spectrum, and comparing it with the reference spectrum obtained from the T8 device. The key steps involved in this process are:
-
-- **Load the Waveform and T8 Spectrum Data**: The waveform data is loaded from API using the Waveform class, and the reference T8 spectrum is loaded using the Spectrum class.
-
-- **Define the frequency Range**: The frequency range is determined based on the minimum and maximum frequency values in the T8 spectrum.
-
-- **Calculate the Spectrum of the Waveform**: The waveform's spectrum is generated using the `wave.create_spectrum(fmin, fmax) ` method, which applies a Hanning window, zero-padding, and computes the Fast Fourier Transform (FFT). The calculated spectrum is filtered within a frequency range defined by the T8 spectrum.
-
-- **Plot the Spectra**: A plot is generated showing both the calculated waveform spectrum and the reference T8 spectrum, with the two spectra superimposed for easy comparison.
-
-### 2. Utils Directory (`utils\`)
-   This directory contains auxiliary modules that handle various tasks necessary for the spectrum comparison. It includes:
-
-  - **`functions.py`**: Contains helper functions for tasks such as extracting and converting data from the T8 API, handling environment variables, and other utility methods.
-   
-  - **`waveform.py`**: Contains the `Waveform` class, which represents a waveform with attributes such as time, amplitude, sampling rate, and windowed and padded amplitude values. It includes a method to load waveform data from API, applies a Hanning window to the waveform, use a method to zero-pads the windowed waveform to increase frequency resolution in the FFT, and prints a string representation showing the waveform instance. The `create_spectrum()` method performs the FFT on the padded waveform, computes frequency and amplitude values, and returns a Spectrum object with the computed values.
-  
-      This class is essential for preparing the waveform data and calculating its frequency spectrum, which can then be compared with the T8 device's reference spectrum.
-   
-   - **`spectrum.py`**: Contains the `Spectrum` class, which represents a spectrum with frequency values in Hz and their corresponding amplitudes, along with filtered versions of those arrays used after applying frequency range filtering. It includes methods to load spectrum data from API, filter the frequency and amplitude arrays to keep only those within a specified range, and prints a string representation showing the frequency range in Hz and the number of samples.
-
-### 3. Tests Directory (`tests\`)
-This folder contains the unit and integration tests for the project.
-   - **`test_waveform.py`**: This file contains the unit tests for the `Waveform` class. It verifies the correct initialization of the class as well as the functionality of applying a Hanning window to the amplitudes.
-
-## Main Algorithm
-
-The core of the spectrum comparison algorithm is implemented in the `main.py` script. The process involves the following key steps:
-
-- **Loading the Waveform and T8 Spectrum Data**: The waveform data is loaded from API using the Waveform class, and the reference T8 spectrum is loaded using the Spectrum class.
-
-- **Processing the Waveform**: The waveform undergoes processing to generate its frequency spectrum using the `create_spectrum()` method. The spectrum is calculated by applying a Hanning window and zero-padding to the waveform, then computing the Fast Fourier Transform (FFT). The calculated spectrum is filtered within a frequency range defined by the T8 spectrum.
-
-- **Comparison Plot**: A plot is generated showing both the calculated waveform spectrum and the reference T8 spectrum, with the two spectra superimposed for easy comparison.
-
-## Running the Project
-
-This project requires the following environment variables to access T8 data. You must define them in a .env file at the root of the project. The credentials are confidential, so make sure to obtain them from the appropriate source.
-
-- `T8_USER`: Username to access T8 data.
-- `T8_PASSWORD`: Password associated with the T8 user account
-- `DEVICE_IP`: The IP address of the T8 device.
-- `MACHINE`: The identifier or name of the machine being monitored by the T8 device.
-- `POINT`: The specific measurement point on the machine that is being monitored.
-- `PMODE`: The measurement mode or operational mode of the device or machine.
-- `TIME`: The specific timestamp (in the format 'DD-MM-YYYY HH:MM:SS').
-
-The main script (`main`) simply calls `compare_two_spectra`, making it easy to execute the comparison. To run it and visualize the results:
-
-1. Ensure you have the required environment variables.
-
-2. Place the .env file at the root directory of the project.
-3. Run the script:
+Con las variables de entorno configuradas, ejecuta el script con:
 ```bash
-poetry run python main.py
+poetry run python src/spectra_comparison/compare_spectra.py
 ```
 
-After running the script, a plot will be generated comparing the spectrum calculated from the waveform and the reference T8 spectrum.
+### 2. Ejecutar la CLI de T8 Client
+La CLI se puede ejecutar de dos formas: pasando las credenciales directamente en la línea de comandos o configurándolas en variables de entorno.
 
+1. *Pasar credenciales en la línea de comandos*
+
+   Puedes especificar las credenciales (user, passw, host) junto con los parámetros necesarios cada vez que ejecutes un comando:
+   ```bash
+   t8-client -u <user> -p <passw> -h <host> <subcomando> ...
+   ```
+
+2. *Usar variables de entorno*
+
+   Si no quieres pasar las credenciales cada vez que ejecutes un comando, puedes almacenarlas en un archivo `.env`. El archivo debe contener lo siguiente:
+   ```bash 
+   USER=tu_usuario
+   PASSW=tu_contraseña
+   HOST=direccion_del_api
+   ```
+   Una vez que configures estas variables, podrás ejecutar los comandos sin necesidad de especificar *-u*, *-p* o *-h.*
+   ```bash
+   t8-client <subcomando> ...
+   ```
+
+**Subcomandos disponibles**
+- Listar timestamps disponibles:
+   ```bash
+   t8-client list-waves -M <machine> -p <point> -m <pmode>
+   t8-client list-spectra -M <machine> -p <point> -m <pmode>
+   ```
+
+- Obtener y guardar datos. Puedes guardar las formas de onda o espectros en CSV. Estos comandos requieren el parámetro *-t* en formato ISO (YYYY-MM-DDTHH:MM:SS):
+   ```bash
+   t8-client get-wave -M <machine> -p <point> -m <pmode> -t <date>
+   t8-client get-spectrum -M <machine> -p <point> -m <pmode> -t <date>
+   ```
+
+- Graficar y guardar datos como imagen. Puedes guardar las formas de onda o espectros como gráficos PNG:
+   ```bash
+   t8-client plot-wave -M <machine> -p <point> -m <pmode> -t <date>
+   t8-client plot-spectrum -M <machine> -p <point> -m <pmode> -t <date>
+   ```
+
+### 3. Ejecutar los tests
+Para ejecutar las pruebas automatizadas del proyecto:
+```bash
+poetry run pytest
+```
 
 
