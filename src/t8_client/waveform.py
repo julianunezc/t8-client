@@ -1,6 +1,6 @@
 import csv
 import os
-from typing import Self, dict
+from typing import Self
 
 import matplotlib.pyplot as plt
 import numpy as np

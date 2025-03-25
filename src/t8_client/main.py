@@ -12,8 +12,9 @@ This file contains the following functions:
     * plot_spectrum - plots and save spectrum data as a PNG image.
 """
 
+import functools
 import os
-from typing import Callable, dict
+from typing import Callable
 
 import click
 
@@ -53,6 +54,24 @@ def main(
     passw = passw or env_passw
     host = host or env_host
 
+    # Check if any of the required variables are missing
+    missing_vars = []
+    if not user:
+        missing_vars.append("USER")
+    if not passw:
+        missing_vars.append("PASSW")
+    if not host:
+        missing_vars.append("HOST")
+
+    # If any variables are missing, print an error message and exit
+    if missing_vars:
+        missing_vars_str = ", ".join(missing_vars)
+        click.echo(
+            f"Error: Missing the following required credentials: {missing_vars_str}",
+            err=True,
+        )
+        ctx.exit(1)
+
     ctx.ensure_object(dict)
     ctx.obj["USER"] = user
     ctx.obj["PASSW"] = passw
@@ -67,6 +86,7 @@ def common_options(f: Callable) -> Callable:
     @click.option("-M", "--machine", required=True, help="Machine tag")
     @click.option("-p", "--point", required=True, help="Point tag")
     @click.option("-m", "--pmode", required=True, help="Processing mode tag")
+    @functools.wraps(f)
     def wrapper(*args: tuple, **kwargs: dict) -> None:
         return f(*args, **kwargs)
 
