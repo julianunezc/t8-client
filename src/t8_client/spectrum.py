@@ -1,5 +1,6 @@
 import csv
 import os
+from typing import Self, dict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,7 +11,7 @@ import t8_client.functions as fun
 class Spectrum:
     """A class to represent a spectrum."""
 
-    def __init__(self, freq: np.ndarray, amp: np.ndarray):
+    def __init__(self, freq: np.ndarray, amp: np.ndarray) -> None:
         """
         Initializes a Spectrum object with frequency and amplitude arrays.
 
@@ -33,40 +34,45 @@ class Spectrum:
 
     @classmethod
     def from_api(
-        cls,
-        user: str,
-        passw: str,
-        host: str,
-        machine: str,
-        point: str,
-        pmode: str,
-        date: str,
-    ):
+        cls: type[Self],
+        params: dict[str, str],
+    ) -> Self:
         """
-        Loads spectrum data from API using the provided parameters.
+        Loads waveform data from API using the provided parameters.
 
         Parameters
         ----------
-        user : str
-            User to connect with.
-        passw : str
-            Password to connect with.
-        host : str
-            The host address of the API.
-        machine : str
-            Machine tag.
-        point : str
-            Point tag.
-        pmode : str
-            Processing mode tag.
-        date : str
-            Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+        params : dict
+            Dictionary containing the necessary parameters:
+            user : str
+                User to connect with.
+            passw : str
+                Password to connect with.
+            host : str
+                The host address of the API.
+            machine : str
+                Machine tag.
+            point : str
+                Point tag.
+            pmode : str
+                Processing mode tag.
+            date : str
+                Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
 
         Returns
         -------
         Spectrum
             A Spectrum object with the data loaded from the API.
         """
+        # Extract parameters
+        user = params["user"]
+        passw = params["passw"]
+        host = params["host"]
+        machine = params["machine"]
+        point = params["point"]
+        pmode = params["pmode"]
+        date = params["date"]
+
         # Calculate Unix timestamp using the provided date and time
         timestamp = fun.get_unix_timestamp_from_iso(date)
 
@@ -90,7 +96,7 @@ class Spectrum:
         freq = np.linspace(fmin, fmax, len(sp))
         return cls(freq, sp)
 
-    def save_to_csv(self, filename: str):
+    def save_to_csv(self, filename: str) -> None:
         """
         Saves the frequencies in Hz and amplitudes of the spectrum into a CSV file.
         The file is always saved in the './output/reports/' directory.
@@ -111,7 +117,7 @@ class Spectrum:
             for freq, amp in zip(self.freq, self.amp):
                 writer.writerow([freq, amp])
 
-    def plot_data(self, filename: str):
+    def plot_data(self, filename: str) -> None:
         """
         Plots and saves the spectrum data (frequency vs amplitude) as a PNG.
         The file is always saved in the './output/figures/' directory.
@@ -137,7 +143,7 @@ class Spectrum:
         # Save the figure to the file as a PNG
         plt.savefig(file_path, format="png")
 
-    def apply_filter(self, fmin: float, fmax: float):
+    def apply_filter(self, fmin: float, fmax: float) -> None:
         """
         Filters the frequencies and amplitudes within a specified range and
         updates the filtered_freq and filtered_amp attributes.

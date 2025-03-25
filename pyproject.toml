@@ -6,7 +6,7 @@ authors = ["Julia <julianunezc@gmail.com>"]
 readme = "README.md"
 packages = [
     {include = "t8_client", from = "src"},
-    {include = "spectra_comparison", from = "src"}  # Agrega esta línea
+    {include = "spectra_comparison", from = "src"}
 ]
 
 [tool.poetry.dependencies]
@@ -23,16 +23,26 @@ click = "^8.1.8"
 ruff = "^0.9.9"
 pytest = "^8.3.5"
 
-[tool.ruff.lint]
-select = [
+[tool.ruff]
+line-length = 88
+lint.select = [
+    "ARG", # flake8-unused-arguments
+    "B",   # flake8-bugbear - common bugs and anti-patterns
+    "C90", # McCabe complexity
     "E",   # pycodestyle
     "F",   # Pyflakes
-    "UP",  # pyupgrade
-    "B",   # flake8-bugbear
-    "SIM", # flake8-simplify
     "I",   # isort
+    "N",   # pep8-naming
+    "NPY", # flake8-numpy
+    "PL",  # pylint
+    "Q",   # flake8-quotes
+    "RET", # flake8-return
+    "RUF", # ruff-specific, import optimization and other inefficiencies
+    "SIM", # flake8-simplify
+    "UP",  # pyupgradej
+    "W",   # pycodestyle
+    "ANN", # flake8-annotations - Consistent type annotations
 ]
-ignore = []
 
 [tool.poetry.scripts]
 t8-client = "t8_client.main:main"

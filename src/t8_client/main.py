@@ -13,12 +13,13 @@ This file contains the following functions:
 """
 
 import os
+from typing import Callable, dict
 
 import click
 
 import t8_client.functions as fun
-from t8_client.spectrum import Spectrum as sp
-from t8_client.waveform import Waveform as wf
+from t8_client.spectrum import Spectrum as Sp
+from t8_client.waveform import Waveform as Wf
 
 
 @click.group()
@@ -26,7 +27,9 @@ from t8_client.waveform import Waveform as wf
 @click.option("-p", "--passw", default=None, help="Password to connect with")
 @click.option("-h", "--host", default=None, help="T8 host")
 @click.pass_context
-def main(ctx: click.Context, user: str | None, passw: str | None, host: str | None):
+def main(
+    ctx: click.Context, user: str | None, passw: str | None, host: str | None
+) -> None:
     """
     CLI client to interact with the T8 API.
 
@@ -56,14 +59,18 @@ def main(ctx: click.Context, user: str | None, passw: str | None, host: str | No
     ctx.obj["HOST"] = host
 
 
-def common_options(f):
+def common_options(f: Callable) -> Callable:
     """
-    Decorator that adds the common options machine, point and pmode to subcommands.
+    Decorator that adds the common options machine, point, and pmode to subcommands.
     """
-    f = click.option("-M", "--machine", required=True, help="Machine tag")(f)
-    f = click.option("-p", "--point", required=True, help="Point tag")(f)
-    f = click.option("-m", "--pmode", required=True, help="Processing mode tag")(f)
-    return f
+
+    @click.option("-M", "--machine", required=True, help="Machine tag")
+    @click.option("-p", "--point", required=True, help="Point tag")
+    @click.option("-m", "--pmode", required=True, help="Processing mode tag")
+    def wrapper(*args: tuple, **kwargs: dict) -> None:
+        return f(*args, **kwargs)
+
+    return wrapper
 
 
 @main.command()
@@ -126,7 +133,9 @@ def list_spectra(ctx: click.Context, machine: str, point: str, pmode: str) -> li
 @common_options
 @click.pass_context
 @click.option("-t", "--date", required=True, help="Timestamp")
-def get_wave(ctx: click.Context, machine: str, point: str, pmode: str, date: str):
+def get_wave(
+    ctx: click.Context, machine: str, point: str, pmode: str, date: str
+) -> None:
     """
     Gets the waveform data for the specified machine, point, pmode and date,
     and saves it as a CSV file.
@@ -142,15 +151,16 @@ def get_wave(ctx: click.Context, machine: str, point: str, pmode: str, date: str
     date : str
         Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
     """
-    wave = wf.from_api(
-        user=ctx.obj["USER"],
-        passw=ctx.obj["PASSW"],
-        host=ctx.obj["HOST"],
-        machine=machine,
-        point=point,
-        pmode=pmode,
-        date=date,
-    )
+    params = {
+        "user": ctx.obj["USER"],
+        "passw": ctx.obj["PASSW"],
+        "host": ctx.obj["HOST"],
+        "machine": machine,
+        "point": point,
+        "pmode": pmode,
+        "date": date,
+    }
+    wave = Wf.from_api(params)
     safe_datetime = date.replace(":", "-")
     filename = f"waveform_{machine}_{point}_{pmode}_{safe_datetime}.csv"
 
@@ -162,7 +172,9 @@ def get_wave(ctx: click.Context, machine: str, point: str, pmode: str, date: str
 @common_options
 @click.pass_context
 @click.option("-t", "--date", required=True, help="Timestamp")
-def get_spectrum(ctx: click.Context, machine: str, point: str, pmode: str, date: str):
+def get_spectrum(
+    ctx: click.Context, machine: str, point: str, pmode: str, date: str
+) -> None:
     """
     Gets the spectrum data for the specified machine, point, pmode and date,
     and saves it as a CSV file.
@@ -178,15 +190,16 @@ def get_spectrum(ctx: click.Context, machine: str, point: str, pmode: str, date:
     date : str
         Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
     """
-    spectrum = sp.from_api(
-        user=ctx.obj["USER"],
-        passw=ctx.obj["PASSW"],
-        host=ctx.obj["HOST"],
-        machine=machine,
-        point=point,
-        pmode=pmode,
-        date=date,
-    )
+    params = {
+        "user": ctx.obj["USER"],
+        "passw": ctx.obj["PASSW"],
+        "host": ctx.obj["HOST"],
+        "machine": machine,
+        "point": point,
+        "pmode": pmode,
+        "date": date,
+    }
+    spectrum = Sp.from_api(params)
     filename = f"spectrum_{machine}_{point}_{pmode}_{date.replace(':', '-')}.csv"
 
     spectrum.save_to_csv(filename)
@@ -197,7 +210,9 @@ def get_spectrum(ctx: click.Context, machine: str, point: str, pmode: str, date:
 @common_options
 @click.pass_context
 @click.option("-t", "--date", required=True, help="Timestamp")
-def plot_wave(ctx: click.Context, machine: str, point: str, pmode: str, date: str):
+def plot_wave(
+    ctx: click.Context, machine: str, point: str, pmode: str, date: str
+) -> None:
     """
     Plots the waveform for the specified machine, point, pmode and date.
 
@@ -212,15 +227,16 @@ def plot_wave(ctx: click.Context, machine: str, point: str, pmode: str, date: st
     date : str
         Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
     """
-    wave = wf.from_api(
-        user=ctx.obj["USER"],
-        passw=ctx.obj["PASSW"],
-        host=ctx.obj["HOST"],
-        machine=machine,
-        point=point,
-        pmode=pmode,
-        date=date,
-    )
+    params = {
+        "user": ctx.obj["USER"],
+        "passw": ctx.obj["PASSW"],
+        "host": ctx.obj["HOST"],
+        "machine": machine,
+        "point": point,
+        "pmode": pmode,
+        "date": date,
+    }
+    wave = Wf.from_api(params)
     filename = f"waveform_{machine}_{point}_{pmode}_{date.replace(':', '-')}"
 
     wave.plot_data(filename=filename)
@@ -231,7 +247,9 @@ def plot_wave(ctx: click.Context, machine: str, point: str, pmode: str, date: st
 @common_options
 @click.pass_context
 @click.option("-t", "--date", required=True, help="Timestamp")
-def plot_spectrum(ctx: click.Context, machine: str, point: str, pmode: str, date: str):
+def plot_spectrum(
+    ctx: click.Context, machine: str, point: str, pmode: str, date: str
+) -> None:
     """
     Plots the waveform for the specified machine, point, pmode and date.
 
@@ -246,15 +264,16 @@ def plot_spectrum(ctx: click.Context, machine: str, point: str, pmode: str, date
     date : str
         Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
     """
-    spectrum = sp.from_api(
-        user=ctx.obj["USER"],
-        passw=ctx.obj["PASSW"],
-        host=ctx.obj["HOST"],
-        machine=machine,
-        point=point,
-        pmode=pmode,
-        date=date,
-    )
+    params = {
+        "user": ctx.obj["USER"],
+        "passw": ctx.obj["PASSW"],
+        "host": ctx.obj["HOST"],
+        "machine": machine,
+        "point": point,
+        "pmode": pmode,
+        "date": date,
+    }
+    spectrum = Sp.from_api(params)
     filename = f"spectrum_{machine}_{point}_{pmode}_{date.replace(':', '-')}"
 
     spectrum.plot_data(filename=filename)

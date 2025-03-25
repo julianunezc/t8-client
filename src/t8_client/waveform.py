@@ -1,18 +1,19 @@
 import csv
 import os
+from typing import Self, dict
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.fft import fft, fftfreq
 
 import t8_client.functions as fun
-from t8_client.spectrum import Spectrum as sp
+from t8_client.spectrum import Spectrum as Sp
 
 
 class Waveform:
     """A class to represent a waveform."""
 
-    def __init__(self, time: np.ndarray, amp: np.ndarray, srate: float):
+    def __init__(self, time: np.ndarray, amp: np.ndarray, srate: float) -> None:
         """
         Initializes a Waveform object with time and amplitude arrays.
 
@@ -39,40 +40,45 @@ class Waveform:
 
     @classmethod
     def from_api(
-        cls,
-        user: str,
-        passw: str,
-        host: str,
-        machine: str,
-        point: str,
-        pmode: str,
-        date: str,
-    ):
+        cls: type[Self],
+        params: dict[str, str],
+    ) -> Self:
         """
         Loads waveform data from API using the provided parameters.
 
         Parameters
         ----------
-        user : str
-            User to connect with.
-        passw : str
-            Password to connect with.
-        host : str
-            The host address of the API.
-        machine : str
-            Machine tag.
-        point : str
-            Point tag.
-        pmode : str
-            Processing mode tag.
-        date : str
-            Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+        params : dict
+            Dictionary containing the necessary parameters:
+            user : str
+                User to connect with.
+            passw : str
+                Password to connect with.
+            host : str
+                The host address of the API.
+            machine : str
+                Machine tag.
+            point : str
+                Point tag.
+            pmode : str
+                Processing mode tag.
+            date : str
+                Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
 
         Returns
         -------
         Waveform
             A Waveform object with the data loaded from the API.
         """
+        # Extract parameters
+        user = params["user"]
+        passw = params["passw"]
+        host = params["host"]
+        machine = params["machine"]
+        point = params["point"]
+        pmode = params["pmode"]
+        date = params["date"]
+
         # Calculate Unix timestamp using the provided date and time
         timestamp = fun.get_unix_timestamp_from_iso(date)
 
@@ -95,7 +101,7 @@ class Waveform:
         time = np.linspace(0, len(wave) / srate, len(wave)) * 1000  # Convert to ms
         return cls(time, wave, srate)
 
-    def save_to_csv(self, filename: str):
+    def save_to_csv(self, filename: str) -> None:
         """
         Saves the time in ms and amplitude data of the waveform into a CSV file.
         The file is always saved in the './output/reports/' directory.
@@ -114,7 +120,7 @@ class Waveform:
             writer.writerow(["time", "amp"])
             writer.writerows(zip(self.time, self.amp))
 
-    def plot_data(self, filename: str):
+    def plot_data(self, filename: str) -> None:
         """
         Plots and saves the waveform data (time vs amplitude) as a PNG.
         The file is always saved in the './output/figures/' directory.
@@ -139,7 +145,7 @@ class Waveform:
         # Save the figure to the file
         plt.savefig(file_path, format="png")
 
-    def hanning_window(self):
+    def hanning_window(self) -> None:
         """
         Applies a Hanning window to the waveform and
         updates the windowed_amps attribute.
@@ -148,7 +154,7 @@ class Waveform:
         window = np.hanning(num_samples)
         self.windowed_amps = self.amp * window
 
-    def zero_padding(self):
+    def zero_padding(self) -> None:
         """
         Applies zero padding to the windowed waveform
         and updates the padded_amps attribute.
@@ -160,7 +166,7 @@ class Waveform:
         padded_len = 2 ** np.ceil(np.log2(n)).astype(int)
         self.padded_amps = np.pad(self.windowed_amps, (0, padded_len - n), "constant")
 
-    def create_spectrum(self, fmin: float, fmax: float) -> sp:
+    def create_spectrum(self, fmin: float, fmax: float) -> Sp:
         """
         Creates the spectrum of a waveform.
 
@@ -190,7 +196,7 @@ class Waveform:
         freqs = fftfreq(len(self.padded_amps), 1.0 / self.srate)  # Compute the freqs
 
         # Create a Spectrum object
-        spectrum = sp(freq=freqs, amp=amps)
+        spectrum = Sp(freq=freqs, amp=amps)
 
         # Filter frequencies within the given range
         spectrum.apply_filter(fmin, fmax)

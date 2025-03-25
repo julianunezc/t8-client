@@ -45,7 +45,7 @@ def fetch_data(url: str, user: str, passw: str) -> dict:
         If the response status code is not 200, the function exits the program.
     """
     response = requests.get(url, auth=(user, passw))
-    if response.status_code != 200:
+    if response.status_code != 200:  # noqa: PLR2004
         print(f"Error getting data. Status code: {response.status_code}")
         sys.exit(1)
     return response.json()

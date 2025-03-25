@@ -15,11 +15,11 @@ import os
 
 import matplotlib.pyplot as plt
 
-from t8_client.spectrum import Spectrum as sp
-from t8_client.waveform import Waveform as wf
+from t8_client.spectrum import Spectrum as Sp
+from t8_client.waveform import Waveform as Wf
 
 
-def compare_two_spectra(machine: str, point: str, pmode: str, date: str):
+def compare_two_spectra(machine: str, point: str, pmode: str, date: str) -> None:
     """
     Compares the spectrum of a waveform with a reference spectrum (T8).
 
@@ -38,8 +38,8 @@ def compare_two_spectra(machine: str, point: str, pmode: str, date: str):
     user = os.getenv("USER")
     passw = os.getenv("PASSW")
     host = os.getenv("HOST")
-    wave = wf.from_api(user, passw, host, machine, point, pmode, date)
-    t8_spectrum = sp.from_api(user, passw, host, machine, point, pmode, date)
+    wave = Wf.from_api(user, passw, host, machine, point, pmode, date)
+    t8_spectrum = Sp.from_api(user, passw, host, machine, point, pmode, date)
 
     # Define the frequency range to consider
     fmin = t8_spectrum.freq.min()
@@ -78,7 +78,7 @@ def compare_two_spectra(machine: str, point: str, pmode: str, date: str):
     plt.show()
 
 
-def main():
+def main() -> None:
     """
     Main function to compare the spectrum of a wave and her reference T8 spectrum.
     """
