@@ -135,7 +135,6 @@ class Spectrum:
         plt.grid(True)
         plt.title("Spectrum Data")
         plt.legend()
-        plt.show()
 
         output_dir = os.path.join(os.getcwd(), "output", "figures")
         os.makedirs(output_dir, exist_ok=True)
@@ -143,6 +142,7 @@ class Spectrum:
 
         # Save the figure to the file as a PNG
         plt.savefig(file_path, format="png")
+        plt.show()
 
     def apply_filter(self, fmin: float, fmax: float) -> None:
         """
