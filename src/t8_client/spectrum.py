@@ -135,6 +135,7 @@ class Spectrum:
         plt.grid(True)
         plt.title("Spectrum Data")
         plt.legend()
+        plt.show()
 
         output_dir = os.path.join(os.getcwd(), "output", "figures")
         os.makedirs(output_dir, exist_ok=True)
