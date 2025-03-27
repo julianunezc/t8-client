@@ -92,7 +92,7 @@ def main() -> None:
     machine = "LP_Turbine"
     point = "MAD31CY005"
     pmode = "AM1"
-    date = "2019-04-11T18:25:54"
+    date = "2019-04-12T20:27:24"
 
     compare_two_spectra(machine, point, pmode, date)
 
