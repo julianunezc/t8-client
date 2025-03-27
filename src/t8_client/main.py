@@ -4,12 +4,12 @@ and spectrum data.
 
 This file contains the following functions:
 
-    * list_waves - lists available waveform capture timestamps.
-    * list_spectra - lists available spectrum capture timestamps.
-    * get_wave - fetches and save waveform data to a CSV file.
-    * get_spectrum - fetches and save spectrum data to a CSV file.
-    * plot_wave - plots and save waveform data as a PNG image.
-    * plot_spectrum - plots and save spectrum data as a PNG image.
+    * list_waves - Lists available waveform capture timestamps.
+    * list_spectra - Lists available spectrum capture timestamps.
+    * get_wave - Fetches and saves waveform data to a CSV file.
+    * get_spectrum - Fetches and saves spectrum data to a CSV file.
+    * plot_wave - Plots and saves waveform data as a PNG image.
+    * plot_spectrum - Plots and saves spectrum data as a PNG image.
 """
 
 import functools
@@ -24,8 +24,8 @@ from t8_client.waveform import Waveform as Wf
 
 
 @click.group()
-@click.option("-u", "--user", default=None, help="User to connect with")
-@click.option("-p", "--passw", default=None, help="Password to connect with")
+@click.option("-u", "--user", default=None, help="User for authentication")
+@click.option("-p", "--passw", default=None, help="Password for authentication")
 @click.option("-h", "--host", default=None, help="T8 host")
 @click.pass_context
 def main(
@@ -80,7 +80,7 @@ def main(
 
 def common_options(f: Callable) -> Callable:
     """
-    Decorator that adds the common options machine, point, and pmode to subcommands.
+    Decorator that adds the common options (machine, point and pmode) to subcommands.
     """
 
     @click.option("-M", "--machine", required=True, help="Machine tag")
@@ -99,7 +99,7 @@ def common_options(f: Callable) -> Callable:
 def list_waves(ctx: click.Context, machine: str, point: str, pmode: str) -> list:
     """
     Lists the waveform capture dates for the specified machine, point and pmode
-    in the format 'YYYY-MM-DDTHH:MM:SS'.
+    in the format 'YYYY-MM-DDTHH:MM:SS' in local time.
 
     Parameters
     ----------
@@ -113,7 +113,8 @@ def list_waves(ctx: click.Context, machine: str, point: str, pmode: str) -> list
     Returns
     -------
     list
-        A list of waveforms timestamps in the format 'YYYY-MM-DDTHH:MM:SS'.
+        A list of waveforms timestamps in the format 'YYYY-MM-DDTHH:MM:SS'
+        in local time.
     """
     url = f"{ctx.obj['HOST']}/rest/waves/{machine}/{point}/{pmode}"
     timestamps = fun.get_timestamps(url, ctx.obj["USER"], ctx.obj["PASSW"])
@@ -127,7 +128,7 @@ def list_waves(ctx: click.Context, machine: str, point: str, pmode: str) -> list
 def list_spectra(ctx: click.Context, machine: str, point: str, pmode: str) -> list:
     """
     Lists the spectra capture dates for the specified machine, point and pmode
-    in the format 'YYYY-MM-DDTHH:MM:SS'.
+    in the format 'YYYY-MM-DDTHH:MM:SS' in local time.
 
     Parameters
     ----------
@@ -141,7 +142,7 @@ def list_spectra(ctx: click.Context, machine: str, point: str, pmode: str) -> li
     Returns
     -------
     list
-        A list of spectra timestamps in the format 'YYYY-MM-DDTHH:MM:SS'.
+        A list of spectra timestamps in the format 'YYYY-MM-DDTHH:MM:SS' in local time.
     """
     url = f"{ctx.obj['HOST']}/rest/spectra/{machine}/{point}/{pmode}"
     timestamps = fun.get_timestamps(url, ctx.obj["USER"], ctx.obj["PASSW"])
@@ -157,7 +158,7 @@ def get_wave(
     ctx: click.Context, machine: str, point: str, pmode: str, date: str
 ) -> None:
     """
-    Gets the waveform data for the specified machine, point, pmode and date,
+    Fetches the waveform data for the specified machine, point, pmode and date,
     and saves it as a CSV file.
 
     Parameters
@@ -169,7 +170,7 @@ def get_wave(
     pmode : str
         Processing mode tag.
     date : str
-        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format in local time.
     """
     params = {
         "user": ctx.obj["USER"],
@@ -196,7 +197,7 @@ def get_spectrum(
     ctx: click.Context, machine: str, point: str, pmode: str, date: str
 ) -> None:
     """
-    Gets the spectrum data for the specified machine, point, pmode and date,
+    Fetches the spectrum data for the specified machine, point, pmode and date,
     and saves it as a CSV file.
 
     Parameters
@@ -208,7 +209,7 @@ def get_spectrum(
     pmode : str
         Processing mode tag.
     date : str
-        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format in local time.
     """
     params = {
         "user": ctx.obj["USER"],
@@ -245,7 +246,7 @@ def plot_wave(
     pmode : str
         Processing mode tag.
     date : str
-        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format in local time.
     """
     params = {
         "user": ctx.obj["USER"],
@@ -271,7 +272,7 @@ def plot_spectrum(
     ctx: click.Context, machine: str, point: str, pmode: str, date: str
 ) -> None:
     """
-    Plots the waveform for the specified machine, point, pmode and date.
+    Plots the spectrum for the specified machine, point, pmode and date.
 
     Parameters
     ----------
@@ -282,7 +283,7 @@ def plot_spectrum(
     pmode : str
         Processing mode tag.
     date : str
-        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format in local time.
     """
     params = {
         "user": ctx.obj["USER"],

@@ -51,9 +51,9 @@ class Waveform:
         params : dict
             Dictionary containing the necessary parameters:
             user : str
-                User to connect with.
+                User for authentication.
             passw : str
-                Password to connect with.
+                Password for authentication.
             host : str
                 The host address of the API.
             machine : str
@@ -79,7 +79,7 @@ class Waveform:
         pmode = params["pmode"]
         date = params["date"]
 
-        # Calculate Unix timestamp using the provided date and time
+        # Calculate Unix timestamp using the provided datetime
         timestamp = fun.get_unix_timestamp_from_iso(date)
 
         # API URL
@@ -104,7 +104,7 @@ class Waveform:
     def save_to_csv(self, filename: str) -> None:
         """
         Saves the time in ms and amplitude data of the waveform into a CSV file.
-        The file is always saved in the './output/reports/' directory.
+        The file is saved in the './output/reports/' directory.
 
         Parameters
         ----------
@@ -123,7 +123,7 @@ class Waveform:
     def plot_data(self, filename: str) -> None:
         """
         Plots and saves the waveform data (time vs amplitude) as a PNG.
-        The file is always saved in the './output/figures/' directory.
+        The file is saved in the './output/figures/' directory.
 
         Parameters
         ----------

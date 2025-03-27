@@ -38,16 +38,16 @@ class Spectrum:
         params: dict[str, str],
     ) -> Self:
         """
-        Loads waveform data from API using the provided parameters.
+        Loads spectrum data from API using the provided parameters.
 
         Parameters
         ----------
         params : dict
             Dictionary containing the necessary parameters:
             user : str
-                User to connect with.
+                User for authentication.
             passw : str
-                Password to connect with.
+                Password for authentication.
             host : str
                 The host address of the API.
             machine : str
@@ -57,7 +57,7 @@ class Spectrum:
             pmode : str
                 Processing mode tag.
             date : str
-                Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+                Datetime value in 'YYYY-MM-DDTHH:MM:SS' format in local time.
 
         Returns
         -------
@@ -73,7 +73,7 @@ class Spectrum:
         pmode = params["pmode"]
         date = params["date"]
 
-        # Calculate Unix timestamp using the provided date and time
+        # Calculate Unix timestamp using the provided datetime
         timestamp = fun.get_unix_timestamp_from_iso(date)
 
         # API URL
@@ -99,7 +99,7 @@ class Spectrum:
     def save_to_csv(self, filename: str) -> None:
         """
         Saves the frequencies in Hz and amplitudes of the spectrum into a CSV file.
-        The file is always saved in the './output/reports/' directory.
+        The file is saved in the './output/reports/' directory.
 
         Parameters
         ----------
@@ -120,7 +120,7 @@ class Spectrum:
     def plot_data(self, filename: str) -> None:
         """
         Plots and saves the spectrum data (frequency vs amplitude) as a PNG.
-        The file is always saved in the './output/figures/' directory.
+        The file is saved in the './output/figures/' directory.
 
         Parameters
         ----------

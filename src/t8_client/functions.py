@@ -1,14 +1,16 @@
 """
 This script accumulates all necessary functions for the execution of
-`main.py` and `compare_spectra.py`.
+`main.py`in t8_client/ and `compare_spectra.py` in spectra_comparison/.
 
 This file contains the following functions:
 
-    * fetch_data - fetches data from the API with authentication.
-    * get_unix_timestamp_from_iso - converts an ISO 8601 string to a Unix timestamp.
-    * get_iso_from_unix_timestamp - converts a Unix timestamp to an ISO 8601 string.
-    * get_timestamps - retrieves available waveform or spectrum timestamps.
-    * zint_to_float - decodes a ZINT-encoded string into a NumPy array of floats.
+    * fetch_data - Fetches data from the API with authentication.
+    * get_unix_timestamp_from_iso - Converts an ISO 8601 string in local time
+                                    to a Unix timestamp.
+    * get_iso_from_unix_timestamp - Converts a Unix timestamp to an ISO 8601 string
+                                    in local time.
+    * get_timestamps - Retrieves available waveform or spectrum timestamps.
+    * zint_to_float - Decodes a ZINT-encoded string into a NumPy array of floats.
 """
 
 import sys
@@ -24,21 +26,21 @@ import requests
 
 def fetch_data(url: str, user: str, passw: str) -> dict:
     """
-    Fetches the data from the API.
+    Fetches the data from the API using authentication.
 
     Parameters
     ----------
     url : str
         The URL of the API to fetch data from.
     user : str
-        User to connect with.
+        User for authentication.
     passw : str
-        Password to connect with.
+        Password for authentication.
 
     Returns
     -------
     dict
-        The JSON response from the API as a dictionary.
+        The JSON response from the API parsed into a dictionary.
 
     Raises
     ------
@@ -52,21 +54,21 @@ def fetch_data(url: str, user: str, passw: str) -> dict:
     return response.json()
 
 
-def get_unix_timestamp_from_iso(time_str: str) -> int:
+def get_unix_timestamp_from_iso(iso_str: str) -> int:
     """
-    Converts an ISO 8601 date and time string to a Unix timestamp based on local time.
+    Converts an ISO 8601 datetime string in local time to a Unix timestamp.
 
     Parameters
     ----------
-    time_str : str
-        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+    iso_str : str
+        Datetime value in ISO 8601 format ('YYYY-MM-DDTHH:MM:SS') in local time.
 
     Returns
     -------
     int
-        The Unix timestamp representing the given date and time.
+        Unix timestamp corresponding to the provided ISO 8601 datetime.
     """
-    dt = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
+    dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%S")
     local_timezone = zoneinfo.ZoneInfo("Europe/Madrid")
     dt = dt.replace(tzinfo=local_timezone)
     return int(dt.timestamp())
@@ -74,46 +76,46 @@ def get_unix_timestamp_from_iso(time_str: str) -> int:
 
 def get_iso_from_unix_timestamp(timestamp: int) -> str:
     """
-    Converts a Unix timestamp to an ISO 8601 date and time string in local time.
+    Converts a Unix timestamp to an ISO 8601 datetime string in local time.
 
     Parameters
     ----------
     timestamp : int
-        The Unix timestamp to convert.
+        The Unix timestamp to be converted.
 
     Returns
     -------
     str
-        Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
+        ISO 8601 datetime string ('YYYY-MM-DDTHH:MM:SS') based on the local time.
     """
-    local_timezone=zoneinfo.ZoneInfo("Europe/Madrid")
-    iso_time = datetime.fromtimestamp(timestamp, tz=local_timezone)
-    return iso_time.strftime("%Y-%m-%dT%H:%M:%S")
+    local_tz = zoneinfo.ZoneInfo("Europe/Madrid")
+    dt = datetime.fromtimestamp(timestamp, tz=local_tz)
+    return dt.strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def get_timestamps(url: str, user: str, passw: str) -> list:
     """
-    Fetches the list of available waveform or spectrum timestamps from the API.
+    Fetches available waveform or spectrum timestamps from the API.
 
     Parameters
     ----------
     url : str
         The URL of the API to fetch data from.
     user : str
-        User to connect with.
+        User for authentication.
     passw : str
-        Password to connect with.
+        Password for authentication.
 
     Returns
     -------
     list
-        A list of timestamps in the format 'YYYY-MM-DDTHH:MM:SS' based on local time.
+        A list of available timestamps in ISO 8601 format ('YYYY-MM-DDTHH:MM:SS').
     """
     # Fetch the waveform data from the API
-    r = fetch_data(url, user, passw)
+    data = fetch_data(url, user, passw)
 
     timestamps = []
-    for item in r.get("_items", []):
+    for item in data.get("_items", []):
         url_self = item["_links"]["self"]  # Obtaining the corresponding URL
         parts = url_self.split("/")  # URL parts
         ts = parts[-1]  # Extracting last part of the URL
@@ -122,13 +124,13 @@ def get_timestamps(url: str, user: str, passw: str) -> list:
     return timestamps
 
 
-def zint_to_float(raw: str) -> np.ndarray:
+def zint_to_float(encoded_str: str) -> np.ndarray:
     """
     Converts a ZINT-encoded string to a numpy array of floats.
 
     Parameters
     ----------
-    raw : str
+    encoded_str : str
         A ZINT-encoded string (base64 encoded compressed string).
 
     Returns
@@ -136,8 +138,11 @@ def zint_to_float(raw: str) -> np.ndarray:
     np.ndarray
         A numpy array of floats decoded from the ZINT-encoded string.
     """
-    d = decompress(b64decode(raw.encode()))
+    decoded_data = decompress(b64decode(encoded_str.encode()))
     return np.array(
-        [unpack("h", d[i * 2 : (i + 1) * 2])[0] for i in range(int(len(d) / 2))],
+        [
+            unpack("h", decoded_data[i * 2 : (i + 1) * 2])[0]
+            for i in range(int(len(decoded_data) / 2))
+        ],
         dtype="f",
     )
