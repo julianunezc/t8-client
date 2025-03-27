@@ -72,9 +72,9 @@ Para ello, crea un archivo `.env` en la raíz del proyecto con el siguiente cont
 ```bash
 USER=tu_usuario
 PASSW=tu_contraseña
-HOST=direccion_del_api
+HOST=direccion_de_api
 ```
-Con las variables de entorno configuradas, ejecuta el script con:
+Con las variables de entorno configuradas y los parámetros _machine, point, pmode, date_ definidos (configurables en `main()` dentro del script), ejecuta el archivo con:
 ```bash
 poetry run python src/spectra_comparison/compare_spectra.py
 ```
@@ -109,7 +109,7 @@ La CLI se puede ejecutar de dos formas: pasando las credenciales directamente en
    t8-client list-spectra -M <machine> -p <point> -m <pmode>
    ```
 
-- Obtener y guardar datos. Puedes guardar las formas de onda o espectros en CSV. Estos comandos requieren el parámetro *-t* en formato ISO (YYYY-MM-DDTHH:MM:SS):
+- Obtener y guardar datos. Puedes guardar las formas de onda o espectros en CSV. Estos comandos requieren el timestamp *-t* en formato ISO y hora local de Madrid, España (YYYY-MM-DDTHH:MM:SS):
    ```bash
    t8-client get-wave -M <machine> -p <point> -m <pmode> -t <date>
    t8-client get-spectrum -M <machine> -p <point> -m <pmode> -t <date>
