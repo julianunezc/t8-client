@@ -12,8 +12,9 @@ This file contains the following functions:
 """
 
 import sys
+import zoneinfo
 from base64 import b64decode
-from datetime import datetime, timezone
+from datetime import datetime
 from struct import unpack
 from zlib import decompress
 
@@ -53,7 +54,7 @@ def fetch_data(url: str, user: str, passw: str) -> dict:
 
 def get_unix_timestamp_from_iso(time_str: str) -> int:
     """
-    Converts an ISO 8601 date and time string to a Unix timestamp.
+    Converts an ISO 8601 date and time string to a Unix timestamp based on local time.
 
     Parameters
     ----------
@@ -66,13 +67,14 @@ def get_unix_timestamp_from_iso(time_str: str) -> int:
         The Unix timestamp representing the given date and time.
     """
     dt = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
-    dt = dt.replace(tzinfo=timezone.utc)
+    local_timezone = zoneinfo.ZoneInfo("Europe/Madrid")
+    dt = dt.replace(tzinfo=local_timezone)
     return int(dt.timestamp())
 
 
 def get_iso_from_unix_timestamp(timestamp: int) -> str:
     """
-    Converts a Unix timestamp to an ISO 8601 date and time string.
+    Converts a Unix timestamp to an ISO 8601 date and time string in local time.
 
     Parameters
     ----------
@@ -84,7 +86,8 @@ def get_iso_from_unix_timestamp(timestamp: int) -> str:
     str
         Datetime value in 'YYYY-MM-DDTHH:MM:SS' format.
     """
-    iso_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    local_timezone=zoneinfo.ZoneInfo("Europe/Madrid")
+    iso_time = datetime.fromtimestamp(timestamp, tz=local_timezone)
     return iso_time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
@@ -104,7 +107,7 @@ def get_timestamps(url: str, user: str, passw: str) -> list:
     Returns
     -------
     list
-        A list of timestamps in the format 'YYYY-MM-DDTHH:MM:SS'.
+        A list of timestamps in the format 'YYYY-MM-DDTHH:MM:SS' based on local time.
     """
     # Fetch the waveform data from the API
     r = fetch_data(url, user, passw)
