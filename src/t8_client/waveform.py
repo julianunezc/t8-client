@@ -83,7 +83,7 @@ class Waveform:
         timestamp = fun.get_unix_timestamp_from_iso(date)
 
         # API URL
-        url = f"http://{host}/rest/waves/{machine}/{point}/{pmode}/{timestamp}"
+        url = f"{host}/rest/waves/{machine}/{point}/{pmode}/{timestamp}"
 
         # Fetch the waveform data from the API
         r = fun.fetch_data(url, user, passw)

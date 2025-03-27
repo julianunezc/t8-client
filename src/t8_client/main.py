@@ -115,7 +115,7 @@ def list_waves(ctx: click.Context, machine: str, point: str, pmode: str) -> list
     list
         A list of waveforms timestamps in the format 'YYYY-MM-DDTHH:MM:SS'.
     """
-    url = f"http://{ctx.obj['HOST']}/rest/waves/{machine}/{point}/{pmode}"
+    url = f"{ctx.obj['HOST']}/rest/waves/{machine}/{point}/{pmode}"
     timestamps = fun.get_timestamps(url, ctx.obj["USER"], ctx.obj["PASSW"])
     for ts in timestamps:
         click.echo(ts)
@@ -143,7 +143,7 @@ def list_spectra(ctx: click.Context, machine: str, point: str, pmode: str) -> li
     list
         A list of spectra timestamps in the format 'YYYY-MM-DDTHH:MM:SS'.
     """
-    url = f"http://{ctx.obj['HOST']}/rest/spectra/{machine}/{point}/{pmode}"
+    url = f"{ctx.obj['HOST']}/rest/spectra/{machine}/{point}/{pmode}"
     timestamps = fun.get_timestamps(url, ctx.obj["USER"], ctx.obj["PASSW"])
     for ts in timestamps:
         click.echo(ts)

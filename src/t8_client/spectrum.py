@@ -77,7 +77,7 @@ class Spectrum:
         timestamp = fun.get_unix_timestamp_from_iso(date)
 
         # API URL
-        url = f"http://{host}/rest/spectra/{machine}/{point}/{pmode}/{timestamp}"
+        url = f"{host}/rest/spectra/{machine}/{point}/{pmode}/{timestamp}"
 
         # Fetch the spectrum data from the API
         r = fun.fetch_data(url, user, passw)
